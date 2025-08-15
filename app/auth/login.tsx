@@ -1,3 +1,4 @@
+import { InputField } from "@/components/InputField";
 import { AuthService } from "@/services/authService";
 import { AuthResponse } from "@/types/AuthTypes";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,9 +8,8 @@ import {
   Alert,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function LoginScreen() {
@@ -39,18 +39,15 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
+      <InputField
         placeholder="Digite seu e-mail"
-        placeholderTextColor={"#888"}
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
       />
-      <View style={styles.passwordArea}>
-        <TextInput
-          style={styles.passwordInput}
+      <View style={styles.passwordInput}>
+        <InputField
           placeholder="Digite sua senha"
           placeholderTextColor={"#888"}
           secureTextEntry={hidePassword}
@@ -64,13 +61,19 @@ export default function LoginScreen() {
           <Ionicons
             name={hidePassword ? "eye-off" : "eye"}
             size={24}
-            color="#fff"
+            color="#444111"
           />
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
+      <View style={styles.linkArea}>
+        <Text style={styles.textLinkArea}> Não tem uma conta? </Text>
+        <TouchableOpacity onPress={() => router.push("/auth/cadastrar")}>
+          <Text style={styles.link}> Cadastre-se </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -99,25 +102,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 15,
   },
-  passwordArea: {
-    flexDirection: "row",
-    width: "100%",
-    backgroundColor: "#121212",
-    borderRadius: 5,
-    height: 50,
-    alignItems: "center",
-    marginBottom: 20,
-  },
   passwordInput: {
-    flex: 1,
-    height: 50,
-    color: "#fff",
-    paddingHorizontal: 10,
-    fontSize: 16,
+    flexDirection: "row",
   },
   icon: {
-    width: 50,
-    height: 50,
+    position: "absolute",
+    right: 10,
+    top: 22,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -131,6 +122,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  linkArea: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  textLinkArea: {
+    color: "#333333",
+  },
+  link: {
+    color: "#0066cc",
     fontWeight: "bold",
   },
 });

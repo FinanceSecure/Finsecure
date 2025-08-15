@@ -16,7 +16,20 @@ export const AuthService = {
         error.response?.data?.messagem ||
         error.message?.data?.message ||
         "Erro ao realizar login";
-      throw new Error(msg)
+      throw new Error(msg);
+    }
+  },
+  cadastrar: async (email: string, senha: string) => {
+    try {
+      const response = await api.post("/usuarios/cadastrar", { email, senha });
+      return response.data;
+    } catch (error: any) {
+      console.error("Erro na chamada de cadastro", error);
+      const msg =
+        error.response?.data?.messagem ||
+        error.message?.data?.message ||
+        "Erro ao realizar cadastro";
+      throw new Error(msg);
     }
   }
 };
