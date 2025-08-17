@@ -1,4 +1,5 @@
 import { InputField } from "@/components/InputField";
+import { Colors } from "@/constants/theme";
 import { AuthService } from "@/services/authService";
 import { AuthResponse } from "@/types/AuthTypes";
 import { router } from "expo-router";
@@ -11,28 +12,42 @@ import {
   View
 } from "react-native";
 
-export default function CadastroScreen() {
+export default function Cadastrar() {
   const [nome, setNome] = useState("");
-  const [sobrenome, setSobrenome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLoginRedirect = () => router.push("/auth/login");
+  const validarCampos = () => {
+    if (!nome.trim()) return "O nome é obrigatório.";
+    if (!email.trim()) return "O e-mail é obrigatório.";
+    if (!senha.trim()) return "A senha é obrigatória.";
+    return null;
+  }
 
   const handleCadastro = async () => {
-    if (!email || !senha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-      return;
-    }
+    const erro = validarCampos();
+    if (erro) return Alert.alert("Erro", erro);
 
+    setIsLoading(true);
     try {
-      const result: AuthResponse = await AuthService.cadastrar(email, senha);
-      if (!result.token) {
-        throw new Error("Token não recebido.");
-      }
-      Alert.alert("Bem sucedido!", result.mensagem || "Cadastro realizado com sucesso.");
-      console.log("Redirecionando para o login...");
-      router.push("/auth/login");
-    } catch (error: any) {
-      Alert.alert("Erro ao realizar cadastro", error.message || "Ocorreu um erro inesperado");
+      const result: AuthResponse = await AuthService.cadastrar(
+        email,
+        senha,
+        nome,
+      );
+      Alert.alert("Bem sucedido!", result.mensagem ||
+        "Cadastro realizado com sucesso."
+      );
+      handleLoginRedirect();
+    } catch (error: unknown) {
+      const mensagem = error instanceof Error
+        ? error.message
+        : "Erro inesperado";
+      Alert.alert("Erro", mensagem);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -40,14 +55,9 @@ export default function CadastroScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Cadastro</Text>
       <InputField
-        placeholder="Nome"
+        placeholder="Digite seu nome"
         value={nome}
         onChangeText={setNome}
-      />
-      <InputField
-        placeholder="Seobrenome"
-        value={sobrenome}
-        onChangeText={setSobrenome}
       />
       <InputField
         placeholder="Digite seu e-mail"
@@ -58,16 +68,24 @@ export default function CadastroScreen() {
       />
       <InputField
         placeholder="Digite sua senha"
-        placeholderTextColor={"#888"}
         value={senha}
         onChangeText={setSenha}
       />
-      <TouchableOpacity style={styles.button} onPress={handleCadastro}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleCadastro}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>
+          {isLoading
+            ? "Cadastrando..."
+            : "Cadastrar"
+          }
+        </Text>
       </TouchableOpacity>
       <View style={styles.linkArea}>
         <Text style={styles.textLinkArea}>Já tem uma conta? </Text>
-        <TouchableOpacity onPress={() => router.push("/auth/login")}>
+        <TouchableOpacity onPress={handleLoginRedirect}>
           <Text style={styles.link}> Faça login </Text>
         </TouchableOpacity>
       </View>
@@ -78,6 +96,7 @@ export default function CadastroScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    color: Colors.background,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20
@@ -88,7 +107,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: Colors.primary,
     marginTop: 10,
     padding: 15,
     borderRadius: 5,
@@ -96,7 +115,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: 16,
     fontWeight: "bold"
   },
@@ -105,10 +124,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   textLinkArea: {
-    color: "#333333",
+    color: Colors.text,
   },
   link: {
-    color: "#0066cc",
+    color: Colors.link,
     fontWeight: "bold",
   }
 });

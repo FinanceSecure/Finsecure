@@ -1,7 +1,41 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { Platform } from "react-native";
+
+const TOKEN_KEY = "@app_token";
+
+export const TokenService = {
+  getToken: async (): Promise<string | null> => {
+    try {
+      return await AsyncStorage.getItem(TOKEN_KEY);
+    } catch (error) {
+      console.error("Erro ao obter o token", error);
+      return null;
+    }
+  },
+  setToken: async (token: string): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(TOKEN_KEY, token);
+    } catch (error) {
+      console.error("Erro ao salvar o token", error);
+    }
+  },
+  removeToken: async (): Promise<void> => {
+    try {
+      await AsyncStorage.removeItem(TOKEN_KEY);
+    } catch (error) {
+      console.error("Erro ao remover o token", error);
+    }
+  }
+};
+
+const localhost =
+  Platform.OS === "android"
+    ? 'http://10.0.2.2:3000/api'
+    : 'http://192.168.0.12:3000/api';
 
 const api = axios.create({
-  baseURL: "http://10.0.2.2:3000/api"
+  baseURL: `${localhost}`
 });
 
 export const AuthService = {
@@ -19,9 +53,17 @@ export const AuthService = {
       throw new Error(msg);
     }
   },
-  cadastrar: async (email: string, senha: string) => {
+  cadastrar: async (
+    email: string,
+    senha: string,
+    nome: string,
+  ) => {
     try {
-      const response = await api.post("/usuarios/cadastrar", { email, senha });
+      const response = await api.post("/usuarios/cadastrar", {
+        email,
+        senha,
+        nome,
+      });
       return response.data;
     } catch (error: any) {
       console.error("Erro na chamada de cadastro", error);
