@@ -1,9 +1,11 @@
 import { InputField } from "@/components/InputField";
-import { AuthService } from "@/services/authService";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import { Colors } from "@/constants/theme";
+import { AuthService, TokenService } from "@/services/authService";
 import { AuthResponse } from "@/types/AuthTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -12,27 +14,30 @@ import {
   View
 } from "react-native";
 
-export default function LoginScreen() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [hidePassword, setHidePassword] = useState(true);
 
+  const handleCadastroRedirect = () => router.push("/auth/cadastrar");
   const handleLogin = async () => {
-    if (!email || !senha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-      return;
-    }
+    if (!email || !senha)
+      return Alert.alert("Erro", "Por favor, preencha todos os campos.");
 
+    setIsLoading(true);
     try {
       const result: AuthResponse = await AuthService.login(email, senha);
-      if (!result.token) {
+      if (!result.token)
         throw new Error("Token não recebido.");
-      }
+
+      await TokenService.setToken(result.token);
+
       Alert.alert("Bem sucedido!", result.mensagem || "Login realizado com sucesso.");
-      console.log("Redirecionando para o dashboard...");
       router.push("/dashboard");
     } catch (error: any) {
       Alert.alert("Erro ao realizar login", error.message || "Ocorreu um erro inesperado");
+      setIsLoading(false)
     }
   };
 
@@ -49,7 +54,6 @@ export default function LoginScreen() {
       <View style={styles.passwordInput}>
         <InputField
           placeholder="Digite sua senha"
-          placeholderTextColor={"#888"}
           secureTextEntry={hidePassword}
           value={senha}
           onChangeText={setSenha}
@@ -57,20 +61,23 @@ export default function LoginScreen() {
         <TouchableOpacity
           style={styles.icon}
           onPress={() => setHidePassword(!hidePassword)}
+          disabled={isLoading}
         >
           <Ionicons
             name={hidePassword ? "eye-off" : "eye"}
             size={24}
-            color="#444111"
+            color={Colors.icon}
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
-      </TouchableOpacity>
+      <LoadingAnimation
+        isLoading={isLoading}
+        onPress={handleLogin}
+        buttonText="Entrar"
+      />
       <View style={styles.linkArea}>
         <Text style={styles.textLinkArea}> Não tem uma conta? </Text>
-        <TouchableOpacity onPress={() => router.push("/auth/cadastrar")}>
+        <TouchableOpacity onPress={handleCadastroRedirect} disabled={isLoading}>
           <Text style={styles.link}> Cadastre-se </Text>
         </TouchableOpacity>
       </View>
@@ -81,23 +88,22 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: Colors.background,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
-    color: "#333",
+    color: Colors.text,
     marginBottom: 30,
     fontWeight: "bold",
   },
   input: {
     width: "100%",
     height: 50,
-    backgroundColor: "#121212",
     borderRadius: 5,
-    color: "#fff",
+    color: Colors.white,
     fontSize: 16,
     paddingHorizontal: 10,
     marginBottom: 15,
@@ -112,27 +118,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  button: {
-    backgroundColor: "#0066cc",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   linkArea: {
     flexDirection: "row",
     marginTop: 20,
   },
   textLinkArea: {
-    color: "#333333",
+    color: Colors.text,
   },
   link: {
-    color: "#0066cc",
+    color: Colors.link,
     fontWeight: "bold",
   },
 });
