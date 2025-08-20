@@ -14,7 +14,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function carregarDados() {
       try {
-        const saldoAtual = await SaldoService.verificarSaldo("68a4922de6185db3b2faf312");
+        const saldoAtual = await SaldoService.verificarSaldo();
         setSaldo(saldoAtual.valor);
       } catch (erro) {
         setErro('Erro ao carregar os dados');
