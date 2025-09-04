@@ -1,8 +1,17 @@
+import { AuthResponse } from "@/types/AuthTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { Platform } from "react-native";
 
 const TOKEN_KEY = "@app_token";
+
+interface TokenPayload {
+  usuarioId: string,
+  nome: string,
+  iat: number,
+  exp: number
+}
 
 export const TokenService = {
   getToken: async (): Promise<string | null> => {
@@ -42,7 +51,7 @@ export const AuthService = {
   login: async (email: string, senha: string) => {
     try {
       const response = await api.post("/usuarios/login", { email, senha });
-      return response.data;
+      return response.data as AuthResponse;
     }
     catch (error: any) {
       console.error("Erro na chamada de login", error);
@@ -75,3 +84,12 @@ export const AuthService = {
     }
   }
 };
+
+export function lerDadosToken(token: string): TokenPayload | null {
+  try {
+    return jwtDecode<TokenPayload>(token);
+  } catch (err) {
+    console.error("Erro ao decodificar token: ", err);
+    return null;
+  }
+}
