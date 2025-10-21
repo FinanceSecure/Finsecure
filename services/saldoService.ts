@@ -2,7 +2,7 @@ import axios from "axios";
 import { Platform } from "react-native";
 import { TokenService } from "./authService";
 
-interface SaldoResponse { 
+interface SaldoResponse {
   id: string;
   valor: number;
   data: string;
@@ -41,4 +41,24 @@ export const SaldoService = {
       throw new Error(err)
     }
   },
+
+  async verificarReceita(): Promise<number> {
+    try {
+      const response = (await api.get("/saldo/receita"));
+      return response.data.receita;
+    } catch (err: any) {
+      console.error("Erro ao verificar a receita:", err);
+      throw new Error(err)
+    }
+  },
+
+  async verificarDespesas(): Promise<number> {
+    try {
+      const response = (await api.get("/saldo/despesas"));
+      return response.data.despesas;
+    } catch (err: any) {
+      console.error("Erro ao verificar as despesas:", err);
+      throw new Error(err)
+    }
+  }
 }
