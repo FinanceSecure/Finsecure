@@ -1,8 +1,6 @@
-import axios from "axios";
-import { Platform } from "react-native";
-import { TokenService } from "./authService";
+import { api, TokenService } from "./authService";
 
-interface SaldoResponse { 
+interface SaldoResponse {
   id: string;
   valor: number;
   data: string;
@@ -10,14 +8,16 @@ interface SaldoResponse {
   usuarioId: string;
 }
 
-const apiUrl =
-  Platform.OS === "android"
-    ? "http://10.0.2.2:3000/api"
-    : "http://192.168.0.12:3000/api"
+interface ReceitaResponse {
+  rendaFixa: number;
+  rendaVariavel: number;
+  totalReceitas: number;
+  detalhes: any;
+}
 
-const api = axios.create({
-  baseURL: `${apiUrl}`
-});
+interface DespesaResponse {
+  totalDespesas: number;
+}
 
 api.interceptors.request.use(
   async (config) => {
@@ -38,6 +38,59 @@ export const SaldoService = {
       return response.data;
     } catch (err: any) {
       console.error("Erro ao verificar o saldo:", err);
+      throw new Error(err)
+    }
+  },
+  async verificarReceitas(): Promise<ReceitaResponse> {
+    try {
+      const response = (await api.get("/receita/verificar"));
+      return response.data;
+    } catch (err: any) {
+      console.error("Erro ao verificar as receitas:", err);
+      throw new Error(err)
+    }
+  },
+  async verificarRendaFixa(): Promise<ReceitaResponse> {
+    try {
+      const response = (await api.get("/receita/verificar/renda_fixa"));
+      return response.data;
+    } catch (err: any) {
+      console.error("Erro ao verificar as receitas de renda fixa:", err);
+      throw new Error(err)
+    }
+  },
+  async verificarRendaVariavel(): Promise<ReceitaResponse> {
+    try {
+      const response = (await api.get("/receita/verificar/renda_variavel"));
+      return response.data;
+    } catch (err: any) {
+      console.error("Erro ao verificar as receitas de renda variavel:", err);
+      throw new Error(err)
+    }
+  },
+  async verificarDespesas(): Promise<DespesaResponse> {
+    try {
+      const response = (await api.get("/despesa/verificar"));
+      return response.data;
+    } catch (err: any) {
+      console.error("Erro ao verificar as despesas:", err);
+      throw new Error(err)
+    }
+  },
+  async adicionarDespesa(
+    valor: number,
+    descricao: string,
+    data: string
+  ): Promise<DespesaResponse> {
+    try {
+      const response = await api.post("/despesa/adicionar", {
+        valor,
+        descricao,
+        data
+      });
+      return response.data;
+    } catch (err: any) {
+      console.error("Erro ao adicionar despesa:", err);
       throw new Error(err)
     }
   },

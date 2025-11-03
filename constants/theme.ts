@@ -5,5 +5,9 @@ export const Colors = {
   link: "#0066CC",
   placeholder: "#888888",
   white: "#FFFFFF",
-  icon: "#444111"
+  icon: "#444111",
+  receita: '#00AA00',
+  despesa: '#F50000',
+  card_background: '#FFFFFF',
+  card_shadow: '#000000',
 }
