@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/theme";
+import { InvestimentoService } from "@/services/invService";
 import { SaldoService } from "@/services/saldoService";
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from "react";
@@ -16,6 +17,10 @@ export default function Dashboard() {
   const [saldo, setSaldo] = useState<number | null>(null);
   const [receita, setReceita] = useState<number | null>(null);
   const [despesa, setDespesa] = useState<number | null>(null);
+  const [investimento, setInvestimento] = useState<{
+    valorTotalInvestido: number;
+    lucroLiquido: number
+  } | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,6 +32,8 @@ export default function Dashboard() {
         setReceita(Number(receitas.totalReceitas));
         const despesas = await SaldoService.verificarDespesas();
         setDespesa(Number(despesas.totalDespesas));
+        const investimentoData = await InvestimentoService.buscarInvestimentos();
+        setInvestimento(investimentoData);
       } catch (erro) {
         setErro('Erro ao carregar os dados');
         console.error("Erro:", erro);
@@ -46,12 +53,20 @@ export default function Dashboard() {
     });
   }
 
-  const chartData = useMemo(() => {
-    if (receita === null || despesa === null) return [];
+  const PieChartData = useMemo(() => {
+    if (
+      receita === null ||
+      despesa === null ||
+      investimento === null
+    ) return [];
 
     const safeReceita = isNaN(receita) ? 0 : receita;
     const safeDespesa = isNaN(despesa) ? 0 : despesa;
-    const total = safeReceita + safeDespesa;
+    const safeInvestimento = isNaN(investimento.valorTotalInvestido)
+      ? 0
+      : investimento.valorTotalInvestido;
+
+    const total = safeReceita + safeDespesa + safeInvestimento;
     if (total === 0) return [];
 
     return [
@@ -68,9 +83,16 @@ export default function Dashboard() {
         color: Colors.despesa,
         legendFontColor: Colors.text,
         legendFontSize: 11,
+      },
+      {
+        name: `Investimentos (${((safeInvestimento / total) * 100).toFixed(1)}%)`,
+        population: safeInvestimento,
+        color: Colors.primary,
+        legendFontColor: Colors.text,
+        legendFontSize: 11,
       }
     ];
-  }, [receita, despesa]);
+  }, [receita, despesa, investimento]);
 
   const chartConfig = {
     backgroundGradientFrom: Colors.background,
@@ -103,11 +125,25 @@ export default function Dashboard() {
           </Text>
         </View>
       </View>
+      <View style={styles.investimentosContainer}>
+        <View style={styles.iconInvestimento}>
+          <Feather name="trending-up" size={26} color="#4CAF50" />
+          <Text style={styles.resumoTitulo}>Investimentos</Text>
+        </View>
+        <View style={styles.valorInvestimentoContainer}>
+          <Text style={styles.lucroLiquido}>
+            +{formatarMoeda(investimento?.lucroLiquido ?? 0)}
+          </Text>
+          <Text style={[styles.resumoValor, { marginTop: 15 }]}>
+            {formatarMoeda(investimento?.valorTotalInvestido ?? 0)}
+          </Text>
+        </View>
+      </View>
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>📊 Comparativo Financeiro</Text>
-        {chartData.length > 0 ? (
+        <Text style={styles.chartTitle}>📊 Comparativo</Text>
+        {PieChartData.length > 0 ? (
           <PieChart
-            data={chartData}
+            data={PieChartData}
             width={screenWidth - 50}
             height={200}
             chartConfig={chartConfig}
@@ -146,7 +182,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     marginHorizontal: 20,
-    marginTop: 20,
+    marginTop: 15,
     paddingVertical: 15,
     borderRadius: 10,
     backgroundColor: Colors.card_background,
@@ -162,14 +198,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   resumoTitulo: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 20,
+    color: '#333',
     marginTop: 4,
+    paddingHorizontal: 10
   },
   resumoValor: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 2,
+    color: Colors.text
   },
   separator: {
     width: 1,
@@ -178,7 +216,7 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     marginHorizontal: 20,
-    marginTop: 30,
+    marginTop: 20,
     padding: 10,
     borderRadius: 10,
     backgroundColor: Colors.card_background,
@@ -199,22 +237,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#666',
     fontSize: 14,
-    marginBottom: 10
-  },
-  investimentosContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginTop: 10,
-    paddingVertical: 15,
-    borderRadius: 15,
-    backgroundColor: Colors.card_background,
-    shadowColor: Colors.card_shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    marginBottom: 15
   },
   textInvestimentoTitle: {
     fontSize: 24,
@@ -225,5 +248,43 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginLeft: 10,
     color: "#333"
+  },
+  investimentosContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    marginHorizontal: 20,
+    marginTop: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: Colors.card_background,
+    shadowColor: Colors.card_shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconInvestimento: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginTop: 20,
+    marginBottom: 20
+  },
+  valorInvestimentoContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    position: "relative",
+    paddingRight: 55,
+  },
+  lucroLiquido: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    fontSize: 14,
+    color: Colors.receita,
+    fontWeight: "500",
   },
 });
