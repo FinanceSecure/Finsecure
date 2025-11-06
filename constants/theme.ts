@@ -1,9 +1,13 @@
 export const Colors = {
   primary: "#007BFF",
-  background: "#F1F1F1",
-  text: "#333333",
-  link: "#0066CC",
-  placeholder: "#888888",
-  white: "#FFFFFF",
-  icon: "#444111"
+  background: "#F0F0F0",
+  text: "#333",
+  link: "#06C",
+  placeholder: "#888",
+  white: "#FFF",
+  icon: "#441",
+  receita: '#0A0',
+  despesa: '#F03',
+  card_background: '#FFF',
+  card_shadow: '#000',
 }

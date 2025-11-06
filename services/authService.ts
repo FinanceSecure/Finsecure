@@ -34,7 +34,7 @@ const localhost =
     ? 'http://10.0.2.2:3000/api'
     : 'http://192.168.0.12:3000/api';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: `${localhost}`
 });
 
