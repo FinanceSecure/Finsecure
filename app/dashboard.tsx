@@ -5,17 +5,20 @@ import { Colors } from "@/constants/theme";
 import { useDashboardData } from "@/hooks/useDashboard";
 import { ChartDataItem } from "@/types";
 import { FormatarMoeda } from "@/utils/formatters";
+import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from "react-native";
 
 export default function Dashboard() {
   const { data, isLoading, error } = useDashboardData();
+  const router = useRouter();
   const createPieChartData = (
     receita: number,
     despesa: number,
@@ -59,7 +62,7 @@ export default function Dashboard() {
     return createPieChartData(
       data.receita,
       data.despesa,
-      data.investimento.valorTotalInvestido
+      data.investimentos.valorTotalInvestido
     );
   }, [data]);
 
@@ -67,7 +70,7 @@ export default function Dashboard() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>Carregando painel de controle...</Text>
+        <Text style={styles.loadingText}>Carregando painel...</Text>
       </View>
     );
   }
@@ -75,7 +78,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>⚠️ {error}</Text>
+        <Text style={styles.errorText}>{error ?? "Erro desconhecido"}</Text>
       </View>
     );
   }
@@ -83,7 +86,7 @@ export default function Dashboard() {
   const saldoAtual = data?.saldo ?? 0;
   const receita = data?.receita ?? 0;
   const despesa = data?.despesa ?? 0;
-  const investimento = data?.investimento;
+  const investimento = data?.investimentos;
 
   return (
     <ScrollView style={styles.container}>
@@ -99,11 +102,13 @@ export default function Dashboard() {
         isLoading={isLoading}
       />
       {investimento && (
-        <InvestimentoCard
-          valorTotalInvestido={investimento.valorTotalInvestido}
-          lucroLiquido={investimento.lucroLiquido}
-          isLoading={isLoading}
-        />
+        <TouchableOpacity onPress={() => router.replace('/investimento')}>
+          <InvestimentoCard
+            valorTotalInvestido={investimento.valorTotalInvestido}
+            lucroLiquido={investimento.lucroLiquido}
+            isLoading={isLoading}
+          />
+        </TouchableOpacity>
       )}
       <ChartCard data={pieChartData} />
     </ScrollView>

@@ -33,7 +33,6 @@ export default function Login() {
 
       await TokenService.setToken(result.token);
 
-      Alert.alert("Bem sucedido!", result.mensagem || "Login realizado com sucesso.");
       router.push("/dashboard");
     } catch (error: any) {
       Alert.alert("Erro ao realizar login", error.message || "Ocorreu um erro inesperado");
