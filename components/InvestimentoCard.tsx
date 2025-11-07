@@ -16,7 +16,6 @@ export function InvestimentoCard({
 }: InvestimentoCardProps) {
   const totalFormatado = FormatarMoeda(valorTotalInvestido);
   const lucroFormatado = FormatarMoeda(lucroLiquido);
-  const loadingText = FormatarMoeda(0);
 
   return (
     <View style={styles.investimentoContainer}>

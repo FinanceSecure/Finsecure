@@ -78,6 +78,36 @@ export const InvestimentoService = {
     }
   },
 
+  async buscarExtrato() {
+    try {
+      const { data } = await api.get('investimento/extrato');
+      const investimentoDetalhado = await Promise.all(
+        data.investimentos.map(async (inv: any) => {
+          const tipoId = inv.tipoInvestimentoId;
+          const { data: detalhe } = await api.get(`/investimento/extrato/${tipoId}`);
+          return {
+            id: tipoId,
+            nome: detalhe.nome,
+            valorTotalLiquido: detalhe.valorTotalLiquido,
+            valorTotalRendimentoLiquido: detalhe.valorTotalRendimentoLiquido
+          }
+        })
+      );
+
+      return {
+        data: {
+          valorTotalInvestido: data.valorTotalInvestido,
+          valorTotalRendimentoLiquido: data.valorTotalRendimentoLiquido,
+          lucroLiquido: 0,
+          investimentos: investimentoDetalhado
+        }
+      };
+    } catch (err: any) {
+      console.error("Erro ao buscar extrato completo:", err);
+      throw new Error(err.message);
+    }
+  },
+
   async getTipoInvestimento(tipoInvestimentoId: string): Promise<TipoInvestimentoResponse> {
     try {
       const { data } = await api.get(`/investimento/tipo/${tipoInvestimentoId}`);
@@ -86,4 +116,4 @@ export const InvestimentoService = {
       throw new Error("Erro ao retornar o tipo de investimento: " + e.message);
     }
   },
-}
+};

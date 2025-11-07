@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 
 const INITIAL_INV: InvestimentoData = {
   valorTotalInvestido: 0,
-  lucroLiquido: 0
+  lucroLiquido: 0,
+  valorTotalRendimentoLiquido: 0
 };
 
 export const useDashboardData = () => {
@@ -31,7 +32,9 @@ export const useDashboardData = () => {
           saldo: isNaN(newSaldo) ? 0 : newSaldo,
           receita: isNaN(newReceita) ? 0 : newReceita,
           despesa: isNaN(newDespesa) ? 0 : newDespesa,
-          investimento: investimentoRes || INITIAL_INV
+          investimentos: investimentoRes
+            ? { ...INITIAL_INV, ...investimentoRes }
+            : INITIAL_INV
         })
       } catch (e) {
         console.error("Erro ao carregar dados: ", e);
@@ -40,7 +43,7 @@ export const useDashboardData = () => {
           saldo: 0,
           receita: 0,
           despesa: 0,
-          investimento: INITIAL_INV
+          investimentos: INITIAL_INV
         });
       } finally {
         setIsLoading(false);
