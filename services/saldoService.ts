@@ -37,8 +37,13 @@ export const SaldoService = {
       const response = (await api.get("/saldo/verificar"));
       return response.data;
     } catch (err: any) {
-      console.error("Erro ao verificar o saldo:", err);
-      throw new Error(err)
+      return {
+        id: "",
+        valor: 0,
+        data: new Date().toISOString(),
+        atualizado: new Date().toISOString(),
+        usuarioId: ""
+      }
     }
   },
   async verificarReceitas(): Promise<ReceitaResponse> {
@@ -46,8 +51,12 @@ export const SaldoService = {
       const response = (await api.get("/receita/verificar"));
       return response.data;
     } catch (err: any) {
-      console.error("Erro ao verificar as receitas:", err);
-      throw new Error(err)
+      return {
+        rendaFixa: 0,
+        rendaVariavel: 0,
+        totalReceitas: 0,
+        detalhes: {}
+      }
     }
   },
   async verificarRendaFixa(): Promise<ReceitaResponse> {
@@ -55,8 +64,12 @@ export const SaldoService = {
       const response = (await api.get("/receita/verificar/renda_fixa"));
       return response.data;
     } catch (err: any) {
-      console.error("Erro ao verificar as receitas de renda fixa:", err);
-      throw new Error(err)
+      return {
+        rendaFixa: 0,
+        rendaVariavel: 0,
+        totalReceitas: 0,
+        detalhes: [],
+      };
     }
   },
   async verificarRendaVariavel(): Promise<ReceitaResponse> {
@@ -64,8 +77,12 @@ export const SaldoService = {
       const response = (await api.get("/receita/verificar/renda_variavel"));
       return response.data;
     } catch (err: any) {
-      console.error("Erro ao verificar as receitas de renda variavel:", err);
-      throw new Error(err)
+      return {
+        rendaFixa: 0,
+        rendaVariavel: 0,
+        totalReceitas: 0,
+        detalhes: [],
+      }
     }
   },
   async verificarDespesas(): Promise<DespesaResponse> {
@@ -73,8 +90,9 @@ export const SaldoService = {
       const response = (await api.get("/despesa/verificar"));
       return response.data;
     } catch (err: any) {
-      console.error("Erro ao verificar as despesas:", err);
-      throw new Error(err)
+      return {
+        totalDespesas: 0
+      }
     }
   },
   async adicionarDespesa(
