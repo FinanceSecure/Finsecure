@@ -5,6 +5,7 @@ import { Colors } from "@/constants/theme";
 import { useDashboardData } from "@/hooks/useDashboard";
 import { ChartDataItem } from "@/types";
 import { FormatarMoeda } from "@/utils/formatters";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import {
@@ -90,6 +91,11 @@ export default function Dashboard() {
 
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.rowback}>
+        <TouchableOpacity onPress={() => router.replace(`..`)}>
+          <Feather size={30} name="x-circle" color={"red"}/>
+        </TouchableOpacity>
+      </View>
       <View style={styles.saldoContainer}>
         <Text style={styles.saldoLabel}>Saldo Atual:</Text>
         <Text style={styles.saldoText}>
@@ -120,6 +126,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 70,
     backgroundColor: Colors.background,
+  },
+  rowback: {
+    position: "absolute",
+    right: 25,
+    top: -25
   },
   loadingContainer: {
     flex: 1,
