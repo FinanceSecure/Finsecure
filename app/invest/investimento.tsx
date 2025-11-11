@@ -1,7 +1,14 @@
 import { useInvestimentoData } from "@/hooks/useInvestimento";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 export default function Investimento() {
   const { data, isLoading, error } = useInvestimentoData();
@@ -28,13 +35,16 @@ export default function Investimento() {
     <View style={styles.container}>
       <View style={styles.rowback}>
         <TouchableOpacity onPress={() => router.replace(`/dashboard`)}>
-          <Feather size={26} name="arrow-left"/>
+          <Feather size={26} name="arrow-left" />
         </TouchableOpacity>
       </View>
       <View style={styles.header}>
         <Text style={styles.title}>Investimentos</Text>
         <Text style={styles.total}>
-          Total: {data.valorTotalInvestido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          Total: {data.valorTotalInvestido.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+          })}
         </Text>
       </View>
       <FlatList
@@ -42,13 +52,47 @@ export default function Investimento() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.card}>
+            <TouchableOpacity onPress={() => {
+              router.push({
+                pathname: `/invest/resgatar-investimento`,
+                params: {
+                  id: item.id,
+                  nome: item.nome,
+                  valor: item.valorTotalLiquido
+                }
+              });
+            }}>
+              <View style={styles.resgatarBtn}>
+                <Feather size={24} name="arrow-up" color={"#FFF"} />
+                <Text style={styles.text}>Resgatar</Text>
+              </View>
+            </TouchableOpacity>
+
             <Text style={styles.invNome}>{item.nome}</Text>
             <Text style={styles.valor}>
-              {item.valorTotalLiquido.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {item.valorTotalLiquido.toLocaleString("pt-BR", {
+                style: "currency", currency: "BRL"
+              })}
             </Text>
+
             <Text style={styles.lucro}>
-              {item.valorTotalRendimentoLiquido.toLocaleString("pt-BR", { style: "decimal" })}
+              {item.valorTotalRendimentoLiquido.toLocaleString("pt-BR", {
+                style: "decimal"
+              })}
             </Text>
+
+            <TouchableOpacity onPress={() => {
+              router.push({
+                pathname: "/invest/adicionar-investimento",
+                params: {
+                  id: item.id,
+                  params: item.nome
+                }
+              });
+            }}>
+              <Feather size={24} name="plus-circle" color={"green"} />
+            </TouchableOpacity>
+
           </View>
         )}
       />
@@ -112,5 +156,19 @@ const styles = StyleSheet.create({
     marginBottom: 35,
     fontSize: 16,
     color: "#24983fff"
+  },
+  resgatarBtn: {
+    flexDirection: "column",
+    backgroundColor: "orange",
+    padding: 6,
+    marginRight: 12,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  text: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   }
 });

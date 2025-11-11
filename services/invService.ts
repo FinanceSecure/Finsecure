@@ -73,7 +73,6 @@ export const InvestimentoService = {
         lucroLiquido
       }
     } catch (err: any) {
-      console.error("Erro ao verificar investimento", err);
       throw new Error("Erro ao buscar investimentos: " + (err.response?.statusText || err.message))
     }
   },
@@ -103,7 +102,6 @@ export const InvestimentoService = {
         }
       };
     } catch (err: any) {
-      console.error("Erro ao buscar extrato completo:", err);
       throw new Error(err.message);
     }
   },
@@ -114,6 +112,31 @@ export const InvestimentoService = {
       return data;
     } catch (e: any) {
       throw new Error("Erro ao retornar o tipo de investimento: " + e.message);
+    }
+  },
+
+  async adicionarInvestimento(
+    tipoInvestimentoId: string,
+    dataCompra: string,
+    valorInvestido: number
+  ): Promise<InvestimentoResponse> {
+    try {
+      const { data } = await api.post("/investimento/adicionar", {
+        tipoInvestimentoId,
+        dataCompra,
+        valorInvestido
+      });
+      return data;
+    } catch (e: any) {
+      throw new Error("Erro ao adicionar investimento: " + e.message);
+    }
+  },
+
+  async resgatarInvestimento(tipoInvestimentoId: string, valor?: number): Promise<void> {
+    try {
+      await api.post(`/investimento/resgatar/${tipoInvestimentoId}`, valor ? { valor } : {});
+    } catch (e: any) {
+      throw new Error("Erro ao resgatar investimento: " + e.message);
     }
   },
 };
