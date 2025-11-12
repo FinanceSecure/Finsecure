@@ -106,6 +106,22 @@ export const InvestimentoService = {
     }
   },
 
+  async buscarInvestimentoPorTipo(tipoInvestimentoId: string) {
+    try {
+      const { data } = await api.get(`/investimento/extrato/${tipoInvestimentoId}`);
+      return {
+        valorTotalInvestido: data.valorTotalInvestido,
+        rendimentoBruto: data.valorTotalRendimentoBruto,
+        imposto: data.valorTotalImposto,
+        rendimentoLiquido: data.valorTotalRendimentoLiquido,
+        valorLiquido: data.valorTotalLiquido,
+        ultimasAplicacoes: data.ultimasAplicacoes
+      };
+    } catch (e: any) {
+      throw new Error("Erro ao buscar investimento por tipo: " + e.message);
+    }
+  },
+
   async getTipoInvestimento(tipoInvestimentoId: string): Promise<TipoInvestimentoResponse> {
     try {
       const { data } = await api.get(`/investimento/tipo/${tipoInvestimentoId}`);

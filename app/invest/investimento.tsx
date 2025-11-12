@@ -63,8 +63,7 @@ export default function Investimento() {
               });
             }}>
               <View style={styles.resgatarBtn}>
-                <Feather size={24} name="arrow-up" color={"#FFF"} />
-                <Text style={styles.text}>Resgatar</Text>
+                <Feather size={24} name="arrow-up-circle" color={"orange"} />
               </View>
             </TouchableOpacity>
 
@@ -81,18 +80,36 @@ export default function Investimento() {
               })}
             </Text>
 
-            <TouchableOpacity onPress={() => {
-              router.push({
-                pathname: "/invest/adicionar-investimento",
-                params: {
-                  id: item.id,
-                  params: item.nome
-                }
-              });
-            }}>
-              <Feather size={24} name="plus-circle" color={"green"} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row-reverse", gap: 15 }}>
+              <TouchableOpacity onPress={() => {
+                router.push({
+                  pathname: "/invest/adicionar-investimento",
+                  params: {
+                    id: item.id,
+                    params: item.nome
+                  }
+                });
+              }}>
+                <Feather size={24} name="arrow-down-circle" color={"green"} />
+              </TouchableOpacity>
 
+              <TouchableOpacity onPress={() => {
+                router.push({
+                  pathname: `/invest/detalhe-investimento`,
+                  params: {
+                    id: item.id,
+                    nome: item.nome,
+                    valorInvestido: item.valorTotalInvestido,
+                    rendimentoBruto: item.valorTotalRendimentoBruto,
+                    imposto: item.valorTotalImposto,
+                    rendimentoLiquido: item.valorTotalRendimentoLiquido,
+                    valorLiquido: item.valorTotalLiquido
+                  }
+                });
+              }}>
+                <Feather size={24} name="file-text" color={"blue"} />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -158,11 +175,7 @@ const styles = StyleSheet.create({
     color: "#24983fff"
   },
   resgatarBtn: {
-    flexDirection: "column",
-    backgroundColor: "orange",
-    padding: 6,
     marginRight: 12,
-    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },

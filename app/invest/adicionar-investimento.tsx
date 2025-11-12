@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   btn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#007bff",
+    backgroundColor: "green",
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 10,

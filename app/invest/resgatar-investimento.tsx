@@ -28,7 +28,10 @@ export default function ResgatarInvestimento() {
         return;
       }
 
-      await InvestimentoService.resgatarInvestimento(id, parseFloat(valorResgate));
+      await InvestimentoService.resgatarInvestimento(
+        id,
+        parseFloat(valorResgate)
+      );
       router.replace('/invest/investimento');
     } catch (e: any) {
       Alert.alert("Erro", e.message);
@@ -59,7 +62,7 @@ export default function ResgatarInvestimento() {
           onChangeText={setValorResgate}
         />
         <TouchableOpacity style={styles.btn} onPress={handleResgate}>
-          <Text style={styles.btnText}>Resgatar</Text>
+          <Text style={styles.btnText}>Resgatar Investimento</Text>
         </TouchableOpacity>
       </View>
     </View>
