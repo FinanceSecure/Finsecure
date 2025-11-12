@@ -1,8 +1,11 @@
 export interface InvestimentoItem {
   id: string,
   nome: string,
-  valorTotalLiquido: number,
-  valorTotalRendimentoLiquido: number
+  valorTotalInvestido: number,
+  valorTotalRendimentoBruto: number,
+  valorTotalImposto: number,
+  valorTotalRendimentoLiquido: number,
+  valorTotalLiquido: number
 }
 
 export interface InvestimentoData {

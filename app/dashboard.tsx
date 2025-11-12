@@ -92,8 +92,8 @@ export default function Dashboard() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.rowback}>
-        <TouchableOpacity onPress={() => router.replace(`..`)}>
-          <Feather size={30} name="x-circle" color={"red"}/>
+        <TouchableOpacity onPress={() => router.replace(`/auth/login`)}>
+          <Feather size={30} name="log-out" color={"red"} />
         </TouchableOpacity>
       </View>
       <View style={styles.saldoContainer}>
@@ -108,7 +108,7 @@ export default function Dashboard() {
         isLoading={isLoading}
       />
       {investimento && (
-        <TouchableOpacity onPress={() => router.replace('/investimento')}>
+        <TouchableOpacity onPress={() => router.replace('/invest/investimento')}>
           <InvestimentoCard
             valorTotalInvestido={investimento.valorTotalInvestido}
             lucroLiquido={investimento.lucroLiquido}
