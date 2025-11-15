@@ -11,7 +11,6 @@ import {
   View
 } from "react-native";
 
-
 export default function ResgatarInvestimento() {
   const router = useRouter();
   const { id, nome, valor } = useLocalSearchParams<{
