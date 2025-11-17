@@ -20,7 +20,7 @@ export function InvestimentoCard({
   return (
     <View style={styles.investimentoContainer}>
       <View style={styles.iconInvestimento}>
-        <Feather name="trending-up" size={26} color="#4CAF50" />
+        <Feather name="trending-up" size={26} color="rgba(41, 138, 41, 1)" />
         <Text style={styles.titulo}>Investimentos</Text>
         <View style={styles.valorInvestimentoContainer}>
           <Text style={styles.lucroLiquido}>

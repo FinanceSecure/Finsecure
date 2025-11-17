@@ -1,3 +1,8 @@
+import {
+  CriarRendaVariavelDTO,
+  EditarRendaVariavelDTO,
+  RendaVariavelResponse
+} from "@/types";
 import { api, TokenService } from "./authService";
 
 interface SaldoResponse {
@@ -59,32 +64,60 @@ export const SaldoService = {
       }
     }
   },
-  async verificarRendaFixa(): Promise<ReceitaResponse> {
+
+  async verificarRendaFixa() {
     try {
-      const response = (await api.get("/receita/verificar/renda_fixa"));
-      return response.data;
-    } catch (err: any) {
-      return {
-        rendaFixa: 0,
-        rendaVariavel: 0,
-        totalReceitas: 0,
-        detalhes: [],
-      };
+      const response = await api.get("receita/verificar/rendaFixa");
+      return response.data
+    } catch {
+      return { rendaFixa: null }
     }
   },
-  async verificarRendaVariavel(): Promise<ReceitaResponse> {
+
+  async adicionarRendaFixa(valor: number) {
+    const response = await api.post("/receita/adicionar/rendaFixa", { valor })
+    return response.data;
+  },
+
+  async editarRendaFixa(valor: number) {
+    const response = await api.put("/receita/alterar/rendaFixa", { valor });
+    return response.data;
+  },
+
+  async deletarRendaFixa() {
+    const response = await api.delete("/receita/remover/rendaFixa");
+    return response.data
+  },
+
+  async verificarRendaVariavel(): Promise<any> {
     try {
-      const response = (await api.get("/receita/verificar/renda_variavel"));
+      const response = await api.get("/receita/verificar/rendaVariavel");
       return response.data;
     } catch (err: any) {
-      return {
-        rendaFixa: 0,
-        rendaVariavel: 0,
-        totalReceitas: 0,
-        detalhes: [],
-      }
+      return { descricao: "", valor: 0 }
     }
   },
+
+  async listarRendaVariavel(): Promise<RendaVariavelResponse> {
+    const { data } = await api.get("/receita/verificar/rendaVariavel");
+    return data;
+  },
+
+  async criarRendaVariavel(body: CriarRendaVariavelDTO) {
+    const { data } = await api.post("/receita/adicionar/rendaVariavel", body);
+    return data;
+  },
+
+  async atualizarRendaVariavel(body: EditarRendaVariavelDTO) {
+    const { data } = await api.put("/receita/alterar/rendaVariavel", body);
+    return data;
+  },
+
+  async deletarRendaVariavel(id: string) {
+    const { data } = await api.delete(`/receita/remover/rendaVariavel/${id}`);
+    return data;
+  },
+
   async verificarDespesas(): Promise<DespesaResponse> {
     try {
       const response = (await api.get("/despesa/verificar"));

@@ -6,8 +6,8 @@ export const Colors = {
   placeholder: "#888",
   white: "#FFF",
   icon: "#441",
-  receita: '#0A0',
-  despesa: '#F03',
+  receita: 'rgba(41, 138, 41, 1)',
+  despesa: 'rgba(202, 0, 40, 1)',
   card_background: '#FFF',
   card_shadow: '#000',
 }

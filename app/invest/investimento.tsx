@@ -1,3 +1,4 @@
+import { IOFData } from "@/components/IOFData";
 import { useInvestimentoData } from "@/hooks/useInvestimento";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -47,6 +48,31 @@ export default function Investimento() {
           })}
         </Text>
       </View>
+      <View style={styles.divisor} />
+      <IOFData />
+      <View style={styles.divisor} />
+      <View>
+        <Text>
+          Informações sobre CDI:
+        </Text>
+        <View style={styles.CDIContainer}>
+          <Text>
+            Anual:
+          </Text>
+          <Text style={styles.CDIValor}>
+            14.90%
+          </Text>
+        </View>
+        <View style={styles.CDIContainer}>
+          <Text>
+            Diário:
+          </Text>
+          <Text style={styles.CDIValor}>
+            [(1 + 14.90%)^(1/252)] - 1 = 0.055131064%
+          </Text>
+        </View>
+      </View>
+      <View style={styles.divisor} />
       <FlatList
         data={data.investimentos}
         keyExtractor={(item) => item.id}
@@ -129,6 +155,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#DDDDDDFF",
     alignItems: "center"
   },
+  CDIContainer: {
+    flexDirection: "row",
+    marginVertical: 8,
+  },
+  CDIValor: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
   header: {
     marginBottom: 20,
   },
@@ -172,7 +206,7 @@ const styles = StyleSheet.create({
   lucro: {
     marginBottom: 35,
     fontSize: 16,
-    color: "#24983fff"
+    color: "#1b6d2eff"
   },
   resgatarBtn: {
     marginRight: 12,
@@ -183,5 +217,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
-  }
+  },
+  divisor: {
+    height: 1,
+    backgroundColor: "#EEE9",
+    marginVertical: 10,
+  },
 });

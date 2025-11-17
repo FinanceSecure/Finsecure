@@ -39,7 +39,7 @@ export default function ResgatarInvestimento() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.replace(`/invest/investimento`)}>
+      <TouchableOpacity onPress={() => router.back()}>
         <View style={styles.rowback}>
           <Feather size={30} name="arrow-left" />
           <Text style={styles.text}>Voltar</Text>

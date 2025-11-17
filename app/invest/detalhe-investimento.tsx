@@ -48,7 +48,7 @@ export default function DetalheInvestimento() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.replace(`/invest/investimento`)}>
+      <TouchableOpacity onPress={() => router.back()}>
         <View style={styles.rowback}>
           <Feather size={30} name="arrow-left" color={"red"} />
         </View>
@@ -88,7 +88,7 @@ export default function DetalheInvestimento() {
           </Text>
         </View>
         <View style={styles.section}>
-          <Text style={styles.label}>Valor Total Líquido:</Text>
+          <Text style={styles.label}>Total Líquido:</Text>
           <Text style={styles.valorFinal}>
             {FormatarMoeda(valorLiquido)}
           </Text>

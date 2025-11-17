@@ -30,3 +30,32 @@ export interface ChartDataItem {
   legendFontColor: string;
   legendFontSize: number;
 }
+
+export interface RendaVariavelItem {
+  id: string;
+  valor: number;
+  descricao: string;
+  usuarioId: string;
+}
+
+export interface RendaVariavelResponse {
+  rendaVariavel: RendaVariavelItem[];
+}
+
+export interface CriarRendaVariavelDTO {
+  descricao: string;
+  valor: number;
+}
+
+export interface EditarRendaVariavelDTO {
+  id: string;
+  descricao: string;
+  valor: number;
+}
+
+export interface Despesa {
+  id: string;
+  descricao: string;
+  valor: number;
+  categoria: string
+}

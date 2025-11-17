@@ -17,28 +17,36 @@ export const useDashboardData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [saldoRes, receitaRes, despesaRes, investimentoRes] = await Promise.all([
+        const [
+          saldoRes,
+          receitaRes,
+          despesaRes,
+          investimentoRes
+        ] = await Promise.all([
           SaldoService.verificarSaldo(),
           SaldoService.verificarReceitas(),
           SaldoService.verificarDespesas(),
-          InvestimentoService.buscarInvestimentos(),
+          InvestimentoService.buscarInvestimentos()
         ]);
 
-        const newSaldo = Number(saldoRes.valor);
-        const newReceita = Number(receitaRes.totalReceitas);
-        const newDespesa = Number(despesaRes.totalDespesas);
+        const newSaldo = Number(saldoRes?.valor ?? 0);
+        const newReceita = Number(receitaRes?.totalReceitas ?? 0);
+        const newDespesa = Number(despesaRes?.totalDespesas ?? 0);
+        const inv: InvestimentoData = {
+          ...INITIAL_INV,
+          ...(investimentoRes ?? {})
+        };
 
         setData({
           saldo: isNaN(newSaldo) ? 0 : newSaldo,
           receita: isNaN(newReceita) ? 0 : newReceita,
           despesa: isNaN(newDespesa) ? 0 : newDespesa,
-          investimentos: investimentoRes
-            ? { ...INITIAL_INV, ...investimentoRes }
-            : INITIAL_INV
-        })
+          investimentos: inv
+        });
+
       } catch (e) {
         console.error("Erro ao carregar dados: ", e);
-        setError('Erro ao carregar os dados. Tente novamente mais tarde.')
+        setError("Erro ao carregar os dados. Tente novamente mais tarde.");
         setData({
           saldo: 0,
           receita: 0,
@@ -49,7 +57,13 @@ export const useDashboardData = () => {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, []);
-  return { data, isLoading, error };
-}
+
+  return {
+    data,
+    isLoading,
+    error
+  };
+};

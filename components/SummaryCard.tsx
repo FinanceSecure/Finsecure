@@ -1,7 +1,13 @@
 import { Colors } from "@/constants/theme";
 import { FormatarMoeda } from "@/utils/formatters";
 import { Feather } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 interface SummaryCardProps {
   receita: number;
@@ -13,22 +19,28 @@ export function SummaryCard({ receita, despesa, isLoading }: SummaryCardProps) {
   const receitaFormatada = FormatarMoeda(receita);
   const despesaFormatada = FormatarMoeda(despesa);
   const loadingText = "Carregando...";
+  const router = useRouter();
 
   return (
     <View style={styles.cardContainer}>
       <View style={styles.item}>
         <Feather name="arrow-up-circle" size={24} color={Colors.receita} />
-        <Text style={styles.titulo}>Receita</Text>
-        <Text style={[styles.valor, { color: Colors.receita }]}>
-          {isLoading ? loadingText : receitaFormatada}
-        </Text>
+        <TouchableOpacity onPress={() => router.push('/receita/page')}>
+          <Text style={styles.titulo}>Receita</Text>
+          <Text style={[styles.valor, { color: Colors.receita }]}>
+            {isLoading ? loadingText : receitaFormatada}
+          </Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.separator} />
       <View style={styles.item}>
-        <Text style={styles.titulo}>Despesa</Text>
-        <Text style={[styles.valor, { color: Colors.despesa }]}>
-          {isLoading ? loadingText : despesaFormatada}
-        </Text>
+        <Feather name="arrow-up-circle" size={24} color={Colors.despesa} />
+        <TouchableOpacity onPress={() => router.push('/despesa/page')}>
+          <Text style={styles.titulo}>Despesa</Text>
+          <Text style={[styles.valor, { color: Colors.despesa }]}>
+            {isLoading ? loadingText : despesaFormatada}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
