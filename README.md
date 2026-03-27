@@ -1,50 +1,55 @@
-# Welcome to your Expo app 👋
+# 📱 Finsecure
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+O Finsecure é um aplicativo mobile desenvolvido com Expo focado em segurança financeira e gestão de dados. Este projeto utiliza roteamento baseado em arquivos e as melhores práticas do ecossistema React Native.
+🚀 Como Começar
+Pré-requisitos
 
-## Get started
+Antes de iniciar, certifique-se de ter instalado:
 
-1. Install dependencies
+- Node.js (LTS recomendado)
+- npm ou yarn
+- Android Studio (configurado para desenvolvimento Android)
+- Java JDK instalado e as variáveis de ambiente (ANDROID_HOME) configuradas.
 
-   ```bash
-   npm install
-   ```
+## 1. Instalação de Dependências
 
-2. Start the app
+No terminal, dentro da pasta do projeto, execute:
 
-   ```bash
-   npx expo start
-   ```
+```bash
+npm install
+```
 
-In the output, you'll find options to open the app in a
+## 2. Iniciando o App
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Para subir o servidor de desenvolvimento do Expo:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+```bash
+npx expo start
+```
 
-## Get a fresh project
+🛠️ Opções de Visualização
 
-When you're ready, run:
+Após iniciar o servidor, você pode abrir o app de diferentes formas:
+-   Emulador Android: Pressione a no terminal (requer o Android Studio aberto).
+-   Dispositivo Físico (Expo Go): Escaneie o QR Code gerado no terminal usando o app Expo Go no seu celular.
+-   iOS Simulator: Pressione i (disponível apenas em macOS).
+
+📂 Estrutura do Projeto
+
+Este projeto utiliza Expo Router (file-based routing):
+
+    app/: Contém as telas e rotas principais do aplicativo.
+
+    components/: Componentes reutilizáveis de interface.
+
+    assets/: Imagens, fontes e ícones utilizados.
+
+🧹 Resetando o Projeto
+
+Se desejar limpar o código de exemplo e começar do zero:
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Isso moverá o código inicial para app-example/ e criará uma pasta app/ vazia.
