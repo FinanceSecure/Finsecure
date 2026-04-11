@@ -89,7 +89,7 @@ export default function Investimento() {
               });
             }}>
               <View style={styles.resgatarBtn}>
-                <Feather size={24} name="arrow-up-circle" color={"orange"} />
+                <Feather size={24} name="minus-circle" color={"orange"} />
               </View>
             </TouchableOpacity>
 
@@ -116,7 +116,7 @@ export default function Investimento() {
                   }
                 });
               }}>
-                <Feather size={24} name="arrow-down-circle" color={"green"} />
+                <Feather size={24} name="plus-circle" color={"green"} />
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => {
