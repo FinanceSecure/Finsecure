@@ -32,25 +32,28 @@ export default function Login() {
         throw new Error("Token não recebido.");
 
       await TokenService.setToken(result.token);
-
       router.push("/dashboard");
     } catch (error: any) {
       Alert.alert("Erro ao realizar login", error.message || "Ocorreu um erro inesperado");
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      <InputField
-        placeholder="Digite seu e-mail"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <View style={styles.passwordInput}>
+
+      <View style={styles.inputContainer}>
+        <InputField
+          placeholder="Digite seu e-mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
         <InputField
           placeholder="Digite sua senha"
           secureTextEntry={hidePassword}
@@ -64,20 +67,22 @@ export default function Login() {
         >
           <Ionicons
             name={hidePassword ? "eye-off" : "eye"}
-            size={24}
+            size={22}
             color={Colors.icon}
           />
         </TouchableOpacity>
       </View>
+
       <LoadingAnimation
         isLoading={isLoading}
         onPress={handleLogin}
         buttonText="Entrar"
       />
+
       <View style={styles.linkArea}>
-        <Text style={styles.textLinkArea}> Não tem uma conta? </Text>
+        <Text style={styles.textLinkArea}>Não tem uma conta? </Text>
         <TouchableOpacity onPress={handleCadastroRedirect} disabled={isLoading}>
-          <Text style={styles.link}> Cadastre-se </Text>
+          <Text style={styles.link}>Cadastre-se</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -90,42 +95,37 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     color: Colors.text,
-    marginBottom: 30,
+    marginBottom: 40,
     fontWeight: "bold",
+    textAlign: 'center',
   },
-  input: {
+  inputContainer: {
     width: "100%",
-    height: 50,
-    borderRadius: 5,
-    color: Colors.white,
-    fontSize: 16,
-    paddingHorizontal: 10,
     marginBottom: 15,
-  },
-  passwordInput: {
-    flexDirection: "row",
+    position: 'relative',
   },
   icon: {
     position: "absolute",
-    right: 10,
-    top: 22,
-    justifyContent: "center",
-    alignItems: "center",
+    right: 15,
+    top: 15,
+    zIndex: 10,
   },
   linkArea: {
     flexDirection: "row",
-    marginTop: 20,
+    marginTop: 25,
   },
   textLinkArea: {
-    color: Colors.text,
+    color: Colors.placeholder,
+    fontSize: 14,
   },
   link: {
     color: Colors.link,
     fontWeight: "bold",
+    fontSize: 14,
   },
 });

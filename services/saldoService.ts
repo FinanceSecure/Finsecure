@@ -3,7 +3,7 @@ import {
   EditarRendaVariavelDTO,
   RendaVariavelResponse
 } from "@/types";
-import { api, TokenService } from "./authService";
+import { api } from "./authService";
 
 interface SaldoResponse {
   id: string;
@@ -23,18 +23,6 @@ interface ReceitaResponse {
 interface DespesaResponse {
   totalDespesas: number;
 }
-
-api.interceptors.request.use(
-  async (config) => {
-    const token = await TokenService.getToken()
-    if (token)
-      config.headers['Authorization'] = `Bearer ${token}`;
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-)
 
 export const SaldoService = {
   async verificarSaldo(): Promise<SaldoResponse> {
@@ -67,7 +55,7 @@ export const SaldoService = {
 
   async verificarRendaFixa() {
     try {
-      const response = await api.get("receita/verificar/rendaFixa");
+      const response = await api.get("/receita/verificar/rendaFixa");
       return response.data
     } catch {
       return { rendaFixa: null }

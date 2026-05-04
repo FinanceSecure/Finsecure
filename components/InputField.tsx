@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import React from "react";
 import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
 
@@ -10,8 +11,9 @@ export const InputField = ({ secure = false, ...props }: InputFieldProps) => {
     <View style={styles.inputArea}>
       <TextInput
         style={styles.input}
-        placeholderTextColor={"#888"}
+        placeholderTextColor={Colors.placeholder}
         secureTextEntry={secure}
+        autoCorrect={false}
         {...props}
       />
     </View>
@@ -25,10 +27,14 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: Colors.border || "#1A1D23",
     paddingHorizontal: 15,
-    borderRadius: 8,
+    borderRadius: 12,
     marginVertical: 8,
     fontSize: 16,
+    color: Colors.text,
+    backgroundColor: Colors.card_background,
+    elevation: 0,
+    shadowOpacity: 0,
   },
 });

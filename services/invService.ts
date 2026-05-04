@@ -1,4 +1,4 @@
-import { api, TokenService } from "./authService";
+import { api } from "./authService";
 
 export interface TipoInvestimentoResponse {
   id: string;
@@ -27,18 +27,6 @@ export interface InvestimentoResponse {
   aplicacoes: AplicacaoResponse[];
 }
 
-api.interceptors.request.use(
-  async (config) => {
-    const token = await TokenService.getToken()
-    if (token)
-      config.headers['Authorization'] = `Bearer ${token}`;
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-)
-
 export const InvestimentoService = {
   async buscarInvestimentos(): Promise<{
     valorTotalInvestido: number,
@@ -47,17 +35,23 @@ export const InvestimentoService = {
     try {
       const { data } = await api.get("/investimento/extrato");
 
+      if (!data || !data.investimentos)
+        return { valorTotalInvestido: data?.valorTotalInvestido || 0, lucroLiquido: 0 };
+
       let totalAplicado = 0;
       let totalComRendimento = 0;
-
       const hoje = new Date();
 
       for (const inv of data.investimentos) {
-        const taxaDiaria = inv.tipoInvestimento.valorPercentual;
+        const taxaDiaria = inv.tipoInvestimento?.valorPercentual || 0;
+        const aplicacoes = inv.aplicacoes || [];
 
-        for (const aplicacao of inv.aplicacoes) {
-          const valor = aplicacao.valor;
+        for (const aplicacao of aplicacoes) {
+          const valor = Number(aplicacao.valor) || 0;
           const dataAplicacao = new Date(aplicacao.data);
+
+          if (isNaN(dataAplicacao.getTime())) continue;
+
           const diffMs = Math.abs(hoje.getTime() - dataAplicacao.getTime());
           const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
           const valorComRendimento = valor * Math.pow(1 + taxaDiaria, dias);
@@ -66,20 +60,20 @@ export const InvestimentoService = {
           totalComRendimento += valorComRendimento;
         }
       }
-      const lucroLiquido = totalComRendimento - totalAplicado;
 
       return {
-        valorTotalInvestido: data.valorTotalInvestido,
-        lucroLiquido
-      }
+        valorTotalInvestido: data.valorTotalInvestido || 0,
+        lucroLiquido: totalComRendimento - totalAplicado
+      };
     } catch (err: any) {
-      throw new Error("Erro ao buscar investimentos: " + (err.response?.statusText || err.message))
+      console.error("Erro detalhado na API:", err.response?.data);
+      throw new Error("Erro ao buscar investimentos: " + (err.response?.data?.error || err.message));
     }
   },
 
   async buscarExtrato() {
     try {
-      const { data } = await api.get('investimento/extrato');
+      const { data } = await api.get('/investimento/extrato');
       const investimentoDetalhado = await Promise.all(
         data.investimentos.map(async (inv: any) => {
           const tipoId = inv.tipoInvestimentoId;

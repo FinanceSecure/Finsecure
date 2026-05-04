@@ -5,73 +5,71 @@ import { Platform } from "react-native";
 const TOKEN_KEY = "@app_token";
 
 export const TokenService = {
-  getToken: async (): Promise<string | null> => {
-    try {
-      return await AsyncStorage.getItem(TOKEN_KEY);
-    } catch (error) {
-      console.error("Erro ao obter o token", error);
-      return null;
-    }
-  },
-  setToken: async (token: string): Promise<void> => {
-    try {
-      await AsyncStorage.setItem(TOKEN_KEY, token);
-    } catch (error) {
-      console.error("Erro ao salvar o token", error);
-    }
-  },
-  removeToken: async (): Promise<void> => {
-    try {
-      await AsyncStorage.removeItem(TOKEN_KEY);
-    } catch (error) {
-      console.error("Erro ao remover o token", error);
-    }
-  }
+  getToken: async () => await AsyncStorage.getItem(TOKEN_KEY),
+  setToken: async (token: string) =>
+    await AsyncStorage.setItem(TOKEN_KEY, token),
+  removeToken: async () =>
+    await AsyncStorage.removeItem(TOKEN_KEY)
 };
 
-const localhost =
+const BASE_URL =
   Platform.OS === "android"
-    ? 'http://10.0.2.2:3000/api'
-    : 'http://192.168.0.12:3000/api';
+    ? "http://10.0.2.2:3000/api"
+    : "http://192.168.0.12:3000/api";
 
 export const api = axios.create({
-  baseURL: `${localhost}`
+  baseURL: BASE_URL,
+  timeout: 10000
 });
+
+api.interceptors.request.use(async config => {
+  const token = await TokenService.getToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+function getAxiosErrorMessage(error: any) {
+  return (
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    error.message ||
+    "Erro inesperado"
+  );
+}
 
 export const AuthService = {
   login: async (email: string, senha: string) => {
     try {
-      const response = await api.post("/usuarios/login", { email, senha });
+      const response = await api.post("/usuarios/login", {
+        email,
+        senha
+      });
+
       return response.data;
-    }
-    catch (error: any) {
-      console.error("Erro na chamada de login", error);
-      const msg =
-        error.response?.data?.messagem ||
-        error.message?.data?.message ||
-        "Erro ao realizar login";
-      throw new Error(msg);
+    } catch (error: any) {
+      throw new Error(getAxiosErrorMessage(error));
     }
   },
+
   cadastrar: async (
     email: string,
     senha: string,
-    nome: string,
+    nome: string
   ) => {
     try {
       const response = await api.post("/usuarios/cadastrar", {
         email,
         senha,
-        nome,
+        nome
       });
+
       return response.data;
     } catch (error: any) {
-      console.error("Erro na chamada de cadastro", error);
-      const msg =
-        error.response?.data?.messagem ||
-        error.message?.data?.message ||
-        "Erro ao realizar cadastro";
-      throw new Error(msg);
+      throw new Error(getAxiosErrorMessage(error));
     }
   }
 };
