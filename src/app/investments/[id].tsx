@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { api } from "@/data/services/authService";
 import { FormatarMoeda } from "@/utils/formatters";
 import { Ionicons } from "@expo/vector-icons";
@@ -155,12 +156,12 @@ export default function InvestmentDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000"
+    backgroundColor: Colors.background,
   },
   center: {
     flex: 1, justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000"
+    backgroundColor: Colors.background
   },
   header: {
     padding: 25, paddingTop: 60,

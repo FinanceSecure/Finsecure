@@ -1,4 +1,3 @@
-// src/app/(app)/AddTransaction.tsx
 import { Colors } from '@constants/theme';
 import { CreateTransactionDTO, TransactionCategory, TransactionService, TransactionType } from '@data/services/transactionService';
 import { Ionicons } from '@expo/vector-icons';

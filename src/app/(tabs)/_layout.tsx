@@ -1,5 +1,5 @@
 import { Colors } from "@constants/theme";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
@@ -26,11 +26,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="addTransaction"
+        options={{
+          title: "Adicionar Transação",
+          tabBarIcon: ({ color }) =>
+            <Ionicons name="add-circle-sharp" size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="investments"
         options={{
           title: "Investir",
           tabBarIcon: ({ color }) =>
-            <Ionicons name="stats-chart" size={24} color={color} />,
+            <FontAwesome6 name="money-bill-trend-up" size={24} color={color} />,
         }}
       />
     </Tabs>

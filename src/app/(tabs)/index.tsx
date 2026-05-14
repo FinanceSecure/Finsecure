@@ -1,7 +1,9 @@
 import { Colors } from '@constants/theme';
 import { TokenService } from '@data/services/authService';
 import { DashboardData, FinanceService } from '@data/services/financeService';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  Ionicons
+} from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -127,7 +129,11 @@ export default function Dashboard() {
               </View>
               <Text style={[
                 styles.transAmount,
-                { color: item.type === 'INCOME' ? Colors.receita : Colors.despesa }
+                {
+                  color: item.type === 'INCOME'
+                    ? Colors.receita
+                    : Colors.despesa
+                }
               ]}>
                 {item.type === 'INCOME' ? '+ ' : '- '}
                 R$ {Math.abs(item.amount).toFixed(2)}

@@ -6,12 +6,10 @@ import { Platform } from 'react-native';
 const TOKEN_KEY = "finsecure_jwt";
 const MEU_IP_REDE = "192.168.0.13";
 
-// const BASE_URL = Platform.OS === 'android' || Platform.OS === 'ios'
-//   ? `http://${MEU_IP_REDE}:3000/api`
-//   : "http://localhost:3000/api";
-
 const BASE_URL = Platform.select({
-  android: __DEV__ ? "http://10.0.2.2:3000/api" : `http://${MEU_IP_REDE}:3000/api`,
+  android: __DEV__
+    ? "http://10.0.2.2:3000/api"
+    : `http://${MEU_IP_REDE}:3000/api`,
   ios: `http://${MEU_IP_REDE}:3000/api`,
   default: "http://localhost:3000/api",
 });

@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import { api } from "@/data/services/authService";
 import { FormatarPercentual } from "@/utils/formatters";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,14 +34,13 @@ export default function InvestmentsScreen() {
   async function loadScreenData() {
     try {
       setLoading(true);
-      // Chamadas paralelas para otimizar performance
       const [typesRes, totalRes] = await Promise.all([
         api.get("/investimento/tipo"),
         api.get("/investimento/total-investido")
       ]);
 
       setInvestments(typesRes.data);
-      setTotalInvested(totalRes.data.total || 0);
+      setTotalInvested(totalRes.data.totalInvested || 0);
     } catch (error) {
       console.log("Erro ao carregar dados de investimento:", error);
     } finally {
@@ -81,6 +81,9 @@ export default function InvestmentsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.balanceTitle}>Total Investido</Text>
         <Text style={styles.balanceValue}>
           R$ {totalInvested.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
@@ -108,18 +111,21 @@ export default function InvestmentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000"
+    backgroundColor: Colors.background
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000"
+    backgroundColor: Colors.background
   },
   header: {
     padding: 25,
     paddingTop: 60,
-    backgroundColor: "#0a0a0a"
+    backgroundColor: Colors.surface
+  },
+  backButton: {
+    marginBottom: 20
   },
   balanceTitle: {
     color: "#888",
@@ -134,7 +140,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#222",
+    backgroundColor: Colors.surface,
     marginVertical: 20
   },
   title: {
@@ -152,7 +158,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
   card: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
