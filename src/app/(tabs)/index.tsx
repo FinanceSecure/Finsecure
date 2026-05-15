@@ -88,7 +88,7 @@ export default function Dashboard() {
         <TouchableOpacity
           style={styles.balanceCard}
           activeOpacity={0.8}
-          onPress={() => router.push("/(tabs)/investments")}
+          onPress={() => router.push("/(tabs)/addTransaction")}
         >
           <View>
             <Text style={styles.cardLabel}>Saldo total</Text>
