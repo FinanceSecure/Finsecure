@@ -1,9 +1,9 @@
 import { InputField } from "@components/atoms/InputField";
 import LoadingAnimation from "@components/atoms/LoadingAnimation";
 import { Colors } from "@constants/theme";
-import { AuthService } from "@data/services/authService";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { getAuthErrorMessage, useAuth } from "@/modules/auth/useAuth";
 import React, { useState } from "react";
 import {
   Alert,
@@ -11,11 +11,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function Register() {
   const router = useRouter();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,20 +24,28 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      return Alert.alert("Atenção", "Por favor, preencha todos os campos para criar sua conta.");
+    if (!name.trim() || !email.trim() || !password) {
+      Alert.alert("Atenção", "Por favor, preencha todos os campos para criar sua conta.");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Atenção", "A senha deve ter pelo menos 6 caracteres.");
+      return;
     }
 
     try {
       setIsLoading(true);
+      await register({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-      const response = await AuthService.cadastrar(name, email, password);
-
-      Alert.alert("Sucesso!", "Sua conta foi criada. Agora você pode fazer login.");
+      Alert.alert("Sucesso", "Sua conta foi criada. Agora você pode fazer login.");
       router.push("/auth/login");
-
-    } catch (error: any) {
-      Alert.alert("Erro no Cadastro", error.message || "Não foi possível completar o registro.");
+    } catch (error: unknown) {
+      Alert.alert("Erro no Cadastro", getAuthErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +54,7 @@ export default function Register() {
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContainer}
-      style={{ backgroundColor: Colors.background }}
+      style={styles.scrollView}
     >
       <View style={styles.container}>
         <View style={styles.header}>
@@ -62,6 +71,7 @@ export default function Register() {
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
+            textContentType="name"
           />
 
           <InputField
@@ -70,6 +80,8 @@ export default function Register() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
           />
 
           <View style={styles.passwordWrapper}>
@@ -78,10 +90,12 @@ export default function Register() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              autoComplete="new-password"
+              textContentType="newPassword"
             />
             <TouchableOpacity
               style={styles.eyeButton}
-              onPress={() => setShowPassword(!showPassword)}
+              onPress={() => setShowPassword((current) => !current)}
             >
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
@@ -116,6 +130,9 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
   },
+  scrollView: {
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -129,7 +146,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: 40,
     height: 40,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   title: {
     fontSize: 32,
@@ -147,14 +164,14 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   eyeButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 15,
-    height: '100%',
-    justifyContent: 'center',
+    height: "100%",
+    justifyContent: "center",
     zIndex: 1,
   },
   footer: {

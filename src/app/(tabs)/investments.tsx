@@ -1,109 +1,248 @@
+import { EmptyState } from "@/components/Feedback/EmptyState";
+import { LoadingState } from "@/components/Feedback/LoadingState";
 import { Colors } from "@/constants/theme";
-import { api } from "@/data/services/authService";
-import { FormatarPercentual } from "@/utils/formatters";
+import {
+  InvestmentStatementItem,
+  InvestmentType,
+} from "@/modules/investments/investments.types";
+import {
+  useInvestedAmount,
+  useInvestmentStatement,
+  useInvestmentTypes,
+} from "@/modules/investments/useInvestments";
+import {
+  FormatarData,
+  FormatarMoeda,
+  FormatarPercentual,
+} from "@/utils/formatters";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
-interface InvestmentType {
-  id: string;
-  name: string;
-  type: string;
-  benchmarkPercentage: number;
-  hasIncomeTax: boolean;
-}
-
 export default function InvestmentsScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [totalInvested, setTotalInvested] = useState(0);
-  const [investments, setInvestments] = useState<InvestmentType[]>([]);
+  const statementQuery = useInvestmentStatement();
+  const investedAmountQuery = useInvestedAmount();
+  const typesQuery = useInvestmentTypes();
 
-  useEffect(() => {
-    loadScreenData();
-  }, []);
+  const isLoading =
+    statementQuery.isLoading
+    || investedAmountQuery.isLoading
+    || typesQuery.isLoading;
 
-  async function loadScreenData() {
-    try {
-      setLoading(true);
-      const [typesRes, totalRes] = await Promise.all([
-        api.get("/investimento/tipo"),
-        api.get("/investimento/total-investido")
-      ]);
+  const isRefreshing =
+    statementQuery.isRefetching
+    || investedAmountQuery.isRefetching
+    || typesQuery.isRefetching;
 
-      setInvestments(typesRes.data);
-      setTotalInvested(totalRes.data.totalInvested || 0);
-    } catch (error) {
-      console.log("Erro ao carregar dados de investimento:", error);
-    } finally {
-      setLoading(false);
-    }
+  const refreshData = useCallback(() => {
+    statementQuery.refetch();
+    investedAmountQuery.refetch();
+    typesQuery.refetch();
+  }, [investedAmountQuery, statementQuery, typesQuery]);
+
+  if (isLoading) {
+    return <LoadingState />;
   }
 
-  const renderItem = ({ item }: { item: InvestmentType }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => {
-        router.push(`../investments/${item.id}`);
-      }}
-    >
-      <View style={styles.cardContent}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="trending-up" size={24} color="#2ecc71" />
-        </View>
-        <View style={styles.info}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.details}>
-            {item.type} • {FormatarPercentual(item.benchmarkPercentage)} do CDI
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#666" />
-      </View>
-    </TouchableOpacity>
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2ecc71" />
-      </View>
-    );
-  }
+  const summary = statementQuery.data?.summary;
+  const investedAmount = investedAmountQuery.data;
+  const statement = statementQuery.data?.investments ?? [];
+  const activeInvestments = statement.filter((item) => !item.isRedeemed);
+  const types = typesQuery.data ?? [];
+  const netBalance = investedAmount?.netBalance ?? summary?.netBalance ?? 0;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={refreshData}
+          tintColor={Colors.primary}
+        />
+      }
+    >
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+        <View>
+          <Text style={styles.eyebrow}>Carteira</Text>
+          <Text style={styles.title}>Investimentos</Text>
+        </View>
+        <TouchableOpacity style={styles.iconButton} onPress={refreshData}>
+          <Ionicons name="refresh" size={20} color={Colors.text} />
         </TouchableOpacity>
-        <Text style={styles.balanceTitle}>Total Investido</Text>
-        <Text style={styles.balanceValue}>
-          R$ {totalInvested.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-        </Text>
-
-        <View style={styles.divider} />
-
-        <Text style={styles.title}>Onde vamos investir hoje?</Text>
-        <Text style={styles.subtitle}>Escolha uma opção para simular</Text>
       </View>
 
-      <FlatList
-        data={investments}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={styles.empty}>Nenhum investimento disponível no momento.</Text>
-        }
-      />
+      <View style={styles.balanceCard}>
+        <Text style={styles.cardLabel}>Saldo líquido investido</Text>
+        <Text style={styles.balanceValue}>{FormatarMoeda(netBalance)}</Text>
+
+        <View style={styles.summaryGrid}>
+          <SummaryPill label="Aplicado" value={FormatarMoeda(summary?.totalApplied)} />
+          <SummaryPill label="Resgatado" value={FormatarMoeda(summary?.totalRedeemed)} />
+          <SummaryPill label="Rendimento" value={FormatarMoeda(summary?.netYield)} positive />
+          <SummaryPill label="IR" value={FormatarMoeda(summary?.incomeTax)} negative />
+        </View>
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Minha carteira</Text>
+        <Text style={styles.sectionCount}>{activeInvestments.length} ativo(s)</Text>
+      </View>
+
+      {activeInvestments.length ? (
+        activeInvestments.map((item) => (
+          <InvestmentCard
+            key={item.id}
+            item={item}
+            onRedeem={() => {
+              router.push({
+                pathname: "/investments/redeem/[id]",
+                params: {
+                  id: item.id,
+                  name: item.name,
+                  balance: item.totals.netBalance.toString(),
+                },
+              });
+            }}
+          />
+        ))
+      ) : (
+        <EmptyState message="Nenhum investimento ativo." />
+      )}
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Opções disponíveis</Text>
+      </View>
+
+      {types.length ? (
+        types.map((item) => (
+          <InvestmentTypeCard
+            key={item.id}
+            item={item}
+            onPress={() => {
+              router.push({
+                pathname: "/investments/[id]",
+                params: { id: item.id },
+              });
+            }}
+          />
+        ))
+      ) : (
+        <EmptyState message="Nenhum tipo de investimento disponível." />
+      )}
+    </ScrollView>
+  );
+}
+
+function SummaryPill({
+  label,
+  value,
+  positive,
+  negative,
+}: {
+  label: string;
+  value: string;
+  positive?: boolean;
+  negative?: boolean;
+}) {
+  const color = positive ? Colors.receita : negative ? Colors.despesa : Colors.text;
+
+  return (
+    <View style={styles.summaryPill}>
+      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={[styles.summaryValue, { color }]} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function InvestmentCard({
+  item,
+  onRedeem,
+}: {
+  item: InvestmentStatementItem;
+  onRedeem: () => void;
+}) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardTop}>
+        <View style={styles.cardIcon}>
+          <Ionicons name="shield-checkmark" size={20} color={Colors.investimento} />
+        </View>
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardTitle}>{item.name}</Text>
+          <Text style={styles.cardSubtitle}>
+            Compra em {FormatarData(item.purchaseDate || item.startedAt || item.createdAt)}
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.redeemButton} onPress={onRedeem}>
+          <Text style={styles.redeemText}>Resgatar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.cardMetrics}>
+        <Metric label="Aplicado" value={FormatarMoeda(item.totals.applied)} />
+        <Metric label="Líquido" value={FormatarMoeda(item.totals.netBalance)} highlight />
+        <Metric label="Rendimento" value={FormatarMoeda(item.totals.netYield)} positive />
+      </View>
+    </View>
+  );
+}
+
+function InvestmentTypeCard({
+  item,
+  onPress,
+}: {
+  item: InvestmentType;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity style={styles.typeCard} onPress={onPress} activeOpacity={0.8}>
+      <View style={styles.typeIcon}>
+        <Ionicons name="trending-up" size={20} color={Colors.receita} />
+      </View>
+      <View style={styles.cardInfo}>
+        <Text style={styles.cardTitle}>{item.name}</Text>
+        <Text style={styles.cardSubtitle}>
+          {item.type} · {FormatarPercentual(item.benchmarkPercentage)} do CDI
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={Colors.icon} />
+    </TouchableOpacity>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  highlight,
+  positive,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+  positive?: boolean;
+}) {
+  const color = positive ? Colors.receita : highlight ? Colors.investimento : Colors.text;
+
+  return (
+    <View style={styles.metric}>
+      <Text style={styles.metricLabel}>{label}</Text>
+      <Text style={[styles.metricValue, { color }]} numberOfLines={1}>
+        {value}
+      </Text>
     </View>
   );
 }
@@ -111,89 +250,185 @@ export default function InvestmentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
   },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.background
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 48,
+    paddingBottom: 28,
   },
   header: {
-    padding: 25,
-    paddingTop: 60,
-    backgroundColor: Colors.surface
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
-  backButton: {
-    marginBottom: 20
-  },
-  balanceTitle: {
-    color: "#888",
-    fontSize: 14,
-    textTransform: "uppercase"
-  },
-  balanceValue: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "bold",
-    marginTop: 5
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.surface,
-    marginVertical: 20
+  eyebrow: {
+    color: Colors.text_muted,
+    fontSize: 12,
+    textTransform: "uppercase",
   },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff"
+    color: Colors.text,
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 2,
   },
-  subtitle: {
-    fontSize: 14,
-    color: "#aaa",
-    marginTop: 4
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  list: {
-    paddingHorizontal: 20,
-    paddingVertical: 20
+  balanceCard: {
+    borderRadius: 8,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 16,
+    marginBottom: 18,
+  },
+  cardLabel: {
+    color: Colors.text_muted,
+    fontSize: 12,
+  },
+  balanceValue: {
+    color: Colors.text,
+    fontSize: 28,
+    fontWeight: "800",
+    marginTop: 6,
+  },
+  summaryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 16,
+  },
+  summaryPill: {
+    width: "48%",
+    borderRadius: 8,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 10,
+  },
+  summaryLabel: {
+    color: Colors.text_muted,
+    fontSize: 11,
+  },
+  summaryValue: {
+    color: Colors.text,
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: Colors.text,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  sectionCount: {
+    color: Colors.text_muted,
+    fontSize: 12,
   },
   card: {
+    borderRadius: 8,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#333"
+    borderColor: Colors.border,
+    padding: 14,
+    marginBottom: 10,
   },
-  cardContent: {
+  cardTop: {
     flexDirection: "row",
-    alignItems: "center"
-  },
-  iconContainer: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    backgroundColor: "rgba(46, 204, 113, 0.1)",
-    justifyContent: "center",
     alignItems: "center",
-    marginRight: 15
+    gap: 10,
   },
-  info: {
-    flex: 1
+  cardIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: "rgba(59, 130, 246, 0.14)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff"
+  typeIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: "rgba(34, 197, 94, 0.14)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  details: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 2
+  cardInfo: {
+    flex: 1,
   },
-  empty: {
-    color: "#666",
-    textAlign: "center",
-    marginTop: 50
+  cardTitle: {
+    color: Colors.text,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  cardSubtitle: {
+    color: Colors.text_muted,
+    fontSize: 11,
+    marginTop: 3,
+  },
+  redeemButton: {
+    minHeight: 34,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(239, 68, 68, 0.14)",
+  },
+  redeemText: {
+    color: Colors.despesa,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  cardMetrics: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 14,
+  },
+  metric: {
+    flex: 1,
+    borderRadius: 8,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 8,
+  },
+  metricLabel: {
+    color: Colors.text_muted,
+    fontSize: 10,
+  },
+  metricValue: {
+    color: Colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  typeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 14,
+    marginBottom: 10,
   },
 });

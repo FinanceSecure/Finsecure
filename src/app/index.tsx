@@ -5,8 +5,8 @@ export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/auth/login");
-  }, []);
+    router.replace("/(tabs)");
+  }, [router]);
 
   return null;
 }

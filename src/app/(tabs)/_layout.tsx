@@ -41,6 +41,14 @@ export default function TabLayout() {
             <FontAwesome6 name="money-bill-trend-up" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Perfil",
+          tabBarIcon: ({ color }) =>
+            <Ionicons name="person" size={24} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

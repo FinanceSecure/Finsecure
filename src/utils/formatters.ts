@@ -1,15 +1,13 @@
 export const FormatarMoeda = (valor: number | null | undefined): string => {
-  if (valor === null || valor === undefined)
-    return "R$ 0,00";
+  if (valor === null || valor === undefined) return "R$ 0,00";
 
   const safeValor = Number(valor);
 
-  if (isNaN(safeValor) || !isFinite(safeValor))
-    return "R$ 0,00";
+  if (isNaN(safeValor) || !isFinite(safeValor)) return "R$ 0,00";
 
-  return safeValor.toLocaleString('pt-br', {
+  return safeValor.toLocaleString("pt-br", {
     style: "currency",
-    currency: "BRL"
+    currency: "BRL",
   });
 };
 
@@ -17,25 +15,24 @@ export const FormatarPercentual = (valor: number | null | undefined): string => 
   if (valor === null || valor === undefined) return "0,00%";
 
   const safeValor = Number(valor);
-  const percentual = safeValor * 100;
 
-  return `${percentual.toLocaleString('pt-br', {
+  return `${safeValor.toLocaleString("pt-br", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   })}%`;
 };
 
 export const FormatarData = (data: string | Date | null | undefined): string => {
   if (!data) return "--/--/----";
 
-  const d = new Date(data);
-  if (isNaN(d.getTime())) return "Data inválida";
+  const date = new Date(data);
+  if (isNaN(date.getTime())) return "Data inválida";
 
-  return d.toLocaleDateString('pt-br');
+  return date.toLocaleDateString("pt-br");
 };
 
 export const FormatarCompacto = (valor: number): string => {
-  return Intl.NumberFormat('pt-br', {
+  return Intl.NumberFormat("pt-br", {
     notation: "compact",
     compactDisplay: "short",
   }).format(valor);

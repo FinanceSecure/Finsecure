@@ -1,5 +1,5 @@
 import { ChartLegendItem } from "@/components/ChartLegendItem";
-import { Colors } from "@/src/constants/theme";
+import { Colors } from "@/constants/theme";
 import { ChartDataItem } from "@/types";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import { PieChart } from 'react-native-chart-kit';
@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: Colors.card_background,
-    shadowColor: Colors.card_shadow,
+    backgroundColor: Colors.surface,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

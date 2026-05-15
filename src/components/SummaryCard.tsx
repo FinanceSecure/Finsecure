@@ -1,4 +1,4 @@
-import { Colors } from "@/src/constants/theme";
+import { Colors } from "@/constants/theme";
 import { FormatarMoeda } from "@/utils/formatters";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -25,7 +25,7 @@ export function SummaryCard({ receita, despesa, isLoading }: SummaryCardProps) {
     <View style={styles.cardContainer}>
       <View style={styles.item}>
         <Feather name="arrow-up-circle" size={24} color={Colors.receita} />
-        <TouchableOpacity onPress={() => router.push('/receita/page')}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/addTransaction')}>
           <Text style={styles.titulo}>Receita</Text>
           <Text style={[styles.valor, { color: Colors.receita }]}>
             {isLoading ? loadingText : receitaFormatada}
@@ -35,7 +35,7 @@ export function SummaryCard({ receita, despesa, isLoading }: SummaryCardProps) {
       <View style={styles.separator} />
       <View style={styles.item}>
         <Feather name="arrow-up-circle" size={24} color={Colors.despesa} />
-        <TouchableOpacity onPress={() => router.push('/despesa/page')}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/addTransaction')}>
           <Text style={styles.titulo}>Despesa</Text>
           <Text style={[styles.valor, { color: Colors.despesa }]}>
             {isLoading ? loadingText : despesaFormatada}
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingVertical: 15,
     borderRadius: 10,
-    backgroundColor: Colors.card_background,
-    shadowColor: Colors.card_shadow,
+    backgroundColor: Colors.surface,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 20,
-    color: '#333',
+    color: Colors.text,
     marginTop: 4,
     paddingHorizontal: 10
   },

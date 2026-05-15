@@ -1,39 +1,41 @@
 import { InputField } from "@components/atoms/InputField";
 import LoadingAnimation from "@components/atoms/LoadingAnimation";
 import { Colors } from "@constants/theme";
-import {
-  AuthService,
-  TokenService
-} from "@data/services/authService";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, {
-  useState
-} from "react";
+import { getAuthErrorMessage, useAuth } from "@/modules/auth/useAuth";
+import React, { useState } from "react";
 import {
   Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert("Atenção", "Informe e-mail e senha para entrar.");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const data = await AuthService.login(email, password);
-      await TokenService.setToken(data.token);
-
+      await login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
       router.replace("/(tabs)");
-    } catch (error: any) {
-      Alert.alert("Erro de Login", error.message);
+    } catch (error: unknown) {
+      Alert.alert("Erro de Login", getAuthErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +55,8 @@ export default function Login() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
         />
 
         <View style={styles.passwordWrapper}>
@@ -61,10 +65,12 @@ export default function Login() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            autoComplete="password"
+            textContentType="password"
           />
           <TouchableOpacity
             style={styles.eyeButton}
-            onPress={() => setShowPassword(!showPassword)}
+            onPress={() => setShowPassword((current) => !current)}
           >
             <Ionicons
               name={showPassword ? "eye-outline" : "eye-off-outline"}
@@ -119,14 +125,14 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   eyeButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 15,
-    height: '100%',
-    justifyContent: 'center',
+    height: "100%",
+    justifyContent: "center",
     zIndex: 1,
   },
   footer: {

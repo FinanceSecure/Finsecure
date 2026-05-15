@@ -1,68 +1,99 @@
-import { Colors } from '@constants/theme';
-import { CreateTransactionDTO, TransactionCategory, TransactionService, TransactionType } from '@data/services/transactionService';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { getUiErrorMessage } from "@/api/apiError";
+import { Colors } from "@constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useCreateTransaction } from "@/modules/transactions/useTransactions";
+import { TransactionType } from "@/modules/transactions/transactions.types";
+
+const parseMoneyInput = (value: string): number => {
+  const normalizedValue = value
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  const numberValue = Number(normalizedValue);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+};
 
 export default function AddTransaction() {
   const router = useRouter();
-  const [type, setType] = useState<TransactionType>('EXPENSE');
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<TransactionCategory>('OTHER');
-  const [isLoading, setIsLoading] = useState(false);
+  const createTransaction = useCreateTransaction();
+  const [type, setType] = useState<TransactionType>("EXPENSE");
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const numericAmount = useMemo(() => parseMoneyInput(amount), [amount]);
 
   const handleSave = async () => {
-    if (!title || !amount)
-      return Alert.alert('Atenção', 'Preencha o título e o valor.');
+    if (!title.trim() || numericAmount <= 0) {
+      Alert.alert("Atenção", "Preencha o título e um valor maior que zero.");
+      return;
+    }
 
     try {
-      setIsLoading(true);
-      const transactionData: CreateTransactionDTO = {
-        title,
-        amount: parseFloat(amount.replace(',', '.')),
+      await createTransaction.mutateAsync({
+        title: title.trim(),
+        amount: numericAmount,
         date: new Date().toISOString(),
         type,
-        category,
-        isRecurring: false
-      };
+        category: "OTHER",
+        isRecurring: false,
+      });
 
-      await TransactionService.adicionar(transactionData);
-      Alert.alert('Sucesso', 'Transação registrada!');
+      Alert.alert("Sucesso", "Transação registrada.");
       router.back();
-    } catch (error: any) {
-      Alert.alert('Erro', error.message);
-    } finally {
-      setIsLoading(false);
+    } catch (error: unknown) {
+      Alert.alert("Erro", getUiErrorMessage(error, "Erro ao registrar transação."));
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="close" size={28} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Nova Transação</Text>
-        <View style={{ width: 28 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.typeSelector}>
         <TouchableOpacity
-          style={[styles.typeButton, type === 'INCOME' && styles.typeIncomeActive]}
-          onPress={() => setType('INCOME')}
+          style={[styles.typeButton, type === "INCOME" && styles.typeIncomeActive]}
+          onPress={() => setType("INCOME")}
         >
-          <Ionicons name="arrow-up-circle" size={20} color={type === 'INCOME' ? '#FFF' : Colors.success} />
-          <Text style={[styles.typeText, type === 'INCOME' && styles.typeTextActive]}>Receita</Text>
+          <Ionicons
+            name="arrow-up-circle"
+            size={20}
+            color={type === "INCOME" ? "#FFF" : Colors.success}
+          />
+          <Text style={[styles.typeText, type === "INCOME" && styles.typeTextActive]}>
+            Receita
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.typeButton, type === 'EXPENSE' && styles.typeExpenseActive]}
-          onPress={() => setType('EXPENSE')}
+          style={[styles.typeButton, type === "EXPENSE" && styles.typeExpenseActive]}
+          onPress={() => setType("EXPENSE")}
         >
-          <Ionicons name="arrow-down-circle" size={20} color={type === 'EXPENSE' ? '#FFF' : Colors.error} />
-          <Text style={[styles.typeText, type === 'EXPENSE' && styles.typeTextActive]}>Despesa</Text>
+          <Ionicons
+            name="arrow-down-circle"
+            size={20}
+            color={type === "EXPENSE" ? "#FFF" : Colors.error}
+          />
+          <Text style={[styles.typeText, type === "EXPENSE" && styles.typeTextActive]}>
+            Despesa
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -72,7 +103,7 @@ export default function AddTransaction() {
           style={styles.inputAmount}
           placeholder="R$ 0,00"
           placeholderTextColor={Colors.text_muted}
-          keyboardType="numeric"
+          keyboardType="decimal-pad"
           value={amount}
           onChangeText={setAmount}
         />
@@ -80,19 +111,19 @@ export default function AddTransaction() {
         <Text style={styles.label}>Título</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ex: Conta de Luz, Salário..."
+          placeholder="Ex: Conta de luz, salário..."
           placeholderTextColor={Colors.text_muted}
           value={title}
           onChangeText={setTitle}
         />
 
         <TouchableOpacity
-          style={[styles.saveButton, isLoading && { opacity: 0.7 }]}
+          style={[styles.saveButton, createTransaction.isPending && styles.disabledButton]}
           onPress={handleSave}
-          disabled={isLoading}
+          disabled={createTransaction.isPending}
         >
           <Text style={styles.saveButtonText}>
-            {isLoading ? "Salvando..." : "Salvar Transação"}
+            {createTransaction.isPending ? "Salvando..." : "Salvar Transação"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -104,82 +135,88 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    padding: 20
+    padding: 20,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 40,
-    marginBottom: 30
+    marginBottom: 30,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.text
+    fontWeight: "bold",
+    color: Colors.text,
+  },
+  headerSpacer: {
+    width: 28,
   },
   typeSelector: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 15,
-    marginBottom: 30
+    marginBottom: 30,
   },
   typeButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     borderRadius: 12,
     backgroundColor: Colors.surface,
-    gap: 8
+    gap: 8,
   },
   typeIncomeActive: {
-    backgroundColor: Colors.success
+    backgroundColor: Colors.success,
   },
   typeExpenseActive: {
-    backgroundColor: Colors.error
+    backgroundColor: Colors.error,
   },
   typeText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.text
+    fontWeight: "bold",
+    color: Colors.text,
   },
   typeTextActive: {
-    color: '#FFF'
+    color: "#FFF",
   },
   form: {
-    gap: 20
+    gap: 20,
   },
   label: {
     color: Colors.text_muted,
     fontSize: 14,
-    marginBottom: -10
+    marginBottom: -10,
   },
   inputAmount: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.text,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surface,
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   input: {
     backgroundColor: Colors.surface,
     color: Colors.text,
     padding: 16,
     borderRadius: 12,
-    fontSize: 16
+    fontSize: 16,
   },
   saveButton: {
     backgroundColor: Colors.button,
     padding: 18,
     borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 20
+    alignItems: "center",
+    marginTop: 20,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
   saveButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: 'bold'
-  }
+    fontWeight: "bold",
+  },
 });
