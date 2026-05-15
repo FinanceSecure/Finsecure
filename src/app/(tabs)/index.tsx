@@ -71,10 +71,6 @@ export default function Dashboard() {
         }
       >
         <View style={styles.topBar}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/(tabs)/profile")}>
-            <Ionicons name="menu" size={28} color={Colors.text} />
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.iconButton} onPress={logout}>
             <MaterialIcons name="logout" size={24} color={Colors.error} />
           </TouchableOpacity>
@@ -332,8 +328,11 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 44,
     height: 44,
-    justifyContent: "center",
-    alignItems: "center",
+    position: "absolute",
+    right: 16,
+    top: -10,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
   },
   hero: {
     marginBottom: 8,
