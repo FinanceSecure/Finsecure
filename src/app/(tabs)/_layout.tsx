@@ -8,12 +8,17 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: "#888",
+        tabBarInactiveTintColor: Colors.text_muted,
         tabBarStyle: {
-          backgroundColor: "#000",
-          borderTopColor: "#333",
-          height: 65,
+          backgroundColor: Colors.surfaceElevated,
+          borderTopColor: Colors.border,
+          height: 72,
+          paddingTop: 8,
           paddingBottom: 10,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
         },
       }}
     >
@@ -28,7 +33,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="addTransaction"
         options={{
-          title: "Adicionar Transação",
+          title: "Adicionar",
           tabBarIcon: ({ color }) =>
             <Ionicons name="add-circle-sharp" size={24} color={color} />,
         }}

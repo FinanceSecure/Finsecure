@@ -106,14 +106,6 @@ const normalizeStatement = (payload: unknown): InvestmentStatementResponse => {
     investmentCount: asNumber(sourceSummary.investmentCount ?? sourceSummary.quantidadeInvestimentos, investments.length),
   };
 
-  if (__DEV__) {
-    console.log("[InvestmentsService] Statement normalizado", {
-      investments: investments.length,
-      netBalance: summary.netBalance,
-      totalApplied: summary.totalApplied,
-    });
-  }
-
   return { summary, investments };
 };
 

@@ -1,5 +1,6 @@
 import { getUiErrorMessage } from "@/api/apiError";
 import { LoadingState } from "@/components/Feedback/LoadingState";
+import { ErrorState } from "@/components/Feedback/ErrorState";
 import { Colors } from "@/constants/theme";
 import {
   useApplyInvestment,
@@ -7,6 +8,7 @@ import {
 } from "@/modules/investments/useInvestments";
 import { FormatarMoeda } from "@/utils/formatters";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -45,7 +47,7 @@ export default function InvestmentDetailsScreen() {
   const detailsQuery = useInvestmentTypeDetails(investmentId || "", numericAmount);
   const applyInvestment = useApplyInvestment();
 
-  const handleConfirmInvestment = async () => {
+  const applyConfirmedInvestment = async () => {
     if (!investmentId) {
       Alert.alert("Falha", "Tipo de investimento não informado.");
       return;
@@ -68,6 +70,7 @@ export default function InvestmentDetailsScreen() {
         purchaseDate,
       });
 
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
         "Sucesso",
         `Você investiu ${FormatarMoeda(numericAmount)} com sucesso.`,
@@ -78,8 +81,28 @@ export default function InvestmentDetailsScreen() {
     }
   };
 
+  const handleConfirmInvestment = () => {
+    if (!investmentId || numericAmount < MIN_INVESTMENT_AMOUNT) {
+      applyConfirmedInvestment();
+      return;
+    }
+
+    Alert.alert(
+      "Confirmar investimento",
+      `Deseja investir ${FormatarMoeda(numericAmount)}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Investir", onPress: applyConfirmedInvestment },
+      ]
+    );
+  };
+
   if (detailsQuery.isLoading) {
     return <LoadingState />;
+  }
+
+  if (detailsQuery.isError) {
+    return <ErrorState onRetry={() => detailsQuery.refetch()} />;
   }
 
   const investment = detailsQuery.data;
@@ -88,7 +111,7 @@ export default function InvestmentDetailsScreen() {
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>{investment?.name || "Investimento"}</Text>
         <Text style={styles.category}>{investment?.type || "Renda fixa"}</Text>
@@ -150,7 +173,7 @@ export default function InvestmentDetailsScreen() {
         disabled={applyInvestment.isPending}
       >
         {applyInvestment.isPending ? (
-          <ActivityIndicator color="#000" />
+          <ActivityIndicator color={Colors.background} />
         ) : (
           <Text style={styles.investButtonText}>Confirmar Investimento</Text>
         )}
@@ -265,7 +288,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   investButtonText: {
-    color: "#000",
+    color: Colors.background,
     fontSize: 18,
     fontWeight: "bold",
   },

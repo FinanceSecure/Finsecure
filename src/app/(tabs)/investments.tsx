@@ -1,5 +1,7 @@
 import { EmptyState } from "@/components/Feedback/EmptyState";
+import { ErrorState } from "@/components/Feedback/ErrorState";
 import { LoadingState } from "@/components/Feedback/LoadingState";
+import { BrandMark } from "@/components/BrandMark";
 import { Colors } from "@/constants/theme";
 import {
   InvestmentStatementItem,
@@ -53,6 +55,10 @@ export default function InvestmentsScreen() {
     return <LoadingState />;
   }
 
+  if (statementQuery.isError || investedAmountQuery.isError || typesQuery.isError) {
+    return <ErrorState onRetry={refreshData} />;
+  }
+
   const summary = statementQuery.data?.summary;
   const investedAmount = investedAmountQuery.data;
   const statement = statementQuery.data?.investments ?? [];
@@ -75,7 +81,8 @@ export default function InvestmentsScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.eyebrow}>Carteira</Text>
+          <BrandMark compact />
+          <Text style={styles.eyebrow}>CARTEIRA INTELIGENTE</Text>
           <Text style={styles.title}>Investimentos</Text>
         </View>
         <TouchableOpacity style={styles.iconButton} onPress={refreshData}>
@@ -83,8 +90,13 @@ export default function InvestmentsScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={16} color={Colors.text_muted} />
+        <Text style={styles.searchText}>Buscar novos investimentos...</Text>
+      </View>
+
       <View style={styles.balanceCard}>
-        <Text style={styles.cardLabel}>Saldo líquido investido</Text>
+        <Text style={styles.cardLabel}>TOTAL INVESTIDO HOJE</Text>
         <Text style={styles.balanceValue}>{FormatarMoeda(netBalance)}</Text>
 
         <View style={styles.summaryGrid}>
@@ -92,6 +104,27 @@ export default function InvestmentsScreen() {
           <SummaryPill label="Resgatado" value={FormatarMoeda(summary?.totalRedeemed)} />
           <SummaryPill label="Rendimento" value={FormatarMoeda(summary?.netYield)} positive />
           <SummaryPill label="IR" value={FormatarMoeda(summary?.incomeTax)} negative />
+        </View>
+      </View>
+
+      <View style={styles.advisorCard}>
+        <View style={styles.advisorHeader}>
+          <View style={styles.aiIcon}>
+            <Ionicons name="sparkles" size={18} color={Colors.primary} />
+          </View>
+          <View style={styles.cardInfo}>
+            <Text style={styles.advisorTitle}>Consultor IA</Text>
+            <Text style={styles.cardSubtitle}>Estratégia patrimonial personalizada</Text>
+          </View>
+          <Text style={styles.soonPill}>EM BREVE</Text>
+        </View>
+        <Text style={styles.advisorText}>
+          Transforme seus objetivos em uma projeção de investimentos para os próximos anos.
+        </Text>
+        <View style={styles.projectionBars}>
+          {[26, 42, 58, 76, 94].map((height) => (
+            <View key={height} style={[styles.projectionBar, { height }]} />
+          ))}
         </View>
       </View>
 
@@ -122,7 +155,8 @@ export default function InvestmentsScreen() {
       )}
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Opções disponíveis</Text>
+        <Text style={styles.sectionTitle}>Oportunidades</Text>
+        <Text style={styles.sectionCount}>Ver todas</Text>
       </View>
 
       {types.length ? (
@@ -265,19 +299,22 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     color: Colors.text_muted,
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginTop: 22,
     textTransform: "uppercase",
   },
   title: {
     color: Colors.text,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "700",
     marginTop: 2,
   },
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 8,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.surface,
@@ -285,16 +322,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   balanceCard: {
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    backgroundColor: Colors.secondary,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: 16,
     marginBottom: 18,
   },
   cardLabel: {
-    color: Colors.text_muted,
-    fontSize: 12,
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
   },
   balanceValue: {
     color: Colors.text,
@@ -310,8 +349,8 @@ const styles = StyleSheet.create({
   },
   summaryPill: {
     width: "48%",
-    borderRadius: 8,
-    backgroundColor: Colors.background,
+    borderRadius: 12,
+    backgroundColor: "rgba(10, 14, 20, 0.46)",
     borderWidth: 1,
     borderColor: Colors.border,
     padding: 10,
@@ -343,8 +382,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   card: {
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: 14,
@@ -424,11 +463,83 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    backgroundColor: Colors.surfaceElevated,
     borderWidth: 1,
     borderColor: Colors.border,
     padding: 14,
     marginBottom: 10,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 14,
+    backgroundColor: Colors.input,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    marginBottom: 14,
+  },
+  searchText: {
+    color: Colors.text_muted,
+    fontSize: 12,
+  },
+  advisorCard: {
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 16,
+    marginBottom: 18,
+  },
+  advisorHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  aiIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(175, 203, 255, 0.12)",
+  },
+  advisorTitle: {
+    color: Colors.text,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  advisorText: {
+    color: Colors.text_muted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 14,
+  },
+  soonPill: {
+    color: Colors.primary,
+    fontSize: 9,
+    fontWeight: "700",
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: "rgba(175, 203, 255, 0.12)",
+  },
+  projectionBars: {
+    height: 108,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    gap: 8,
+    marginTop: 14,
+  },
+  projectionBar: {
+    width: 22,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    backgroundColor: Colors.primary,
+    opacity: 0.8,
   },
 });

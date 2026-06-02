@@ -1,6 +1,6 @@
 import { getUiErrorMessage } from "@/api/apiError";
 import { setUnauthorizedHandler } from "@/api/httpClient";
-import { secureTokenStorage } from "@/storage/secureTokenStorage";
+import { authTokenStorage } from "@/storage/authTokenStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, {
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<UserTokenData | null>(null);
 
   const clearSession = useCallback(async () => {
-    await secureTokenStorage.removeToken();
+    await authTokenStorage.removeToken();
     queryClient.clear();
     setUser(null);
     setStatus("anonymous");
@@ -47,14 +47,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [clearSession, router]);
 
   const refreshSession = useCallback(async () => {
-    const token = await secureTokenStorage.getToken();
+    const token = await authTokenStorage.getToken();
 
-    if (!token || secureTokenStorage.isTokenExpired(token)) {
+    if (!token || authTokenStorage.isTokenExpired(token)) {
       await clearSession();
       return;
     }
 
     const tokenUser = await authService.getUserFromToken();
+
+    if (!tokenUser) {
+      await clearSession();
+      return;
+    }
+
     setUser(tokenUser);
     setStatus("authenticated");
   }, [clearSession]);
@@ -66,7 +72,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       throw new Error("Resposta de autenticação inválida.");
     }
 
-    await secureTokenStorage.setToken(response.token);
+    await authTokenStorage.setToken(response.token);
     await refreshSession();
   }, [refreshSession]);
 

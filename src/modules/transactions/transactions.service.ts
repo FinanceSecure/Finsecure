@@ -60,16 +60,6 @@ const normalizeStatement = (payload: unknown): TransactionStatementResponse => {
       .filter((item) => item.id || item.title),
   };
 
-  if (__DEV__) {
-    console.log("[TransactionsService] Extrato normalizado", {
-      balance: normalized.balance,
-      incomes: normalized.incomes,
-      expenses: normalized.expenses,
-      totalInvested: normalized.totalInvested,
-      transactions: normalized.transactions.length,
-    });
-  }
-
   return normalized;
 };
 

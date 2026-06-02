@@ -5,7 +5,7 @@ import { Stack, usePathname, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-const publicRoutes = ["/auth/login", "/auth/register"];
+const publicRoutes = ["/auth/login", "/auth/register", "/legal/privacy"];
 
 function ProtectedStack() {
   const router = useRouter();
@@ -37,6 +37,7 @@ function ProtectedStack() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="investments/[id]" />
       <Stack.Screen name="investments/redeem/[id]" />
+      <Stack.Screen name="legal/privacy" />
     </Stack>
   );
 }

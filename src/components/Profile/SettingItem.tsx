@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 interface SettingItemProps {
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   description: string;
   onPress?: () => void;
@@ -39,7 +39,7 @@ export const SettingItem = ({
       activeOpacity={isClickable ? 0.7 : 1}
     >
       <View style={styles.content}>
-        <Ionicons name={icon as any} size={20} color={Colors.primary} />
+        <Ionicons name={icon} size={20} color={Colors.primary} />
         <View style={styles.textContainer}>
           <Text style={styles.label}>{label}</Text>
           <Text style={styles.description}>{description}</Text>
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -82,13 +82,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
     color: Colors.text,
     marginBottom: 2,
   },
   description: {
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.text_muted,
   },
   rightContent: {
@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#fff",
+    color: Colors.background,
   },
 });

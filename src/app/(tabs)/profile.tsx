@@ -1,16 +1,20 @@
 import { AlertMessage } from "@/components/Profile/AlertMessage";
+import { BrandMark } from "@/components/BrandMark";
 import { ProfileHeader } from "@/components/Profile/ProfileHeader";
 import { SettingGroup } from "@/components/Profile/SettingGroup";
 import { SettingItem } from "@/components/Profile/SettingItem";
 import { useAuth } from "@/modules/auth/useAuth";
+import { getUiErrorMessage } from "@/api/apiError";
 import { useChangeEmail, useChangePassword, useDeleteAccount } from "@/modules/profile/useProfile";
 import { Colors } from "@constants/theme";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { Href, useRouter } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [alert, setAlert] = useState<{ type: "error" | "success"; message: string } | null>(null);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [changeEmailVisible, setChangeEmailVisible] = useState(false);
@@ -20,16 +24,18 @@ export default function ProfileScreen() {
   const changeEmailMutation = useChangeEmail();
   const deleteAccountMutation = useDeleteAccount();
 
-  useEffect(() => { }, [user]);
-
   const handleChangePassword = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword) {
       setAlert({ type: "error", message: "Preencha todos os campos" });
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setAlert({ type: "error", message: "Senha deve ter pelo menos 6 caracteres" });
+    if (
+      passwordForm.newPassword.length < 12
+      || !/[A-Z]/.test(passwordForm.newPassword)
+      || !/[^A-Za-z0-9]/.test(passwordForm.newPassword)
+    ) {
+      setAlert({ type: "error", message: "Use pelo menos 12 caracteres, uma letra maiúscula e um caractere especial." });
       return;
     }
 
@@ -38,8 +44,8 @@ export default function ProfileScreen() {
       setAlert({ type: "success", message: "Senha alterada com sucesso!" });
       setPasswordForm({ currentPassword: "", newPassword: "" });
       setChangePasswordVisible(false);
-    } catch {
-      setAlert({ type: "error", message: "Erro ao alterar senha. Tente novamente." });
+    } catch (error: unknown) {
+      setAlert({ type: "error", message: getUiErrorMessage(error, "Erro ao alterar senha.") });
     }
   };
 
@@ -60,8 +66,8 @@ export default function ProfileScreen() {
       setAlert({ type: "success", message: "Email alterado com sucesso!" });
       setEmailForm({ newEmail: "" });
       setChangeEmailVisible(false);
-    } catch {
-      setAlert({ type: "error", message: "Erro ao alterar email. Tente novamente." });
+    } catch (error: unknown) {
+      setAlert({ type: "error", message: getUiErrorMessage(error, "Erro ao alterar email.") });
     }
   };
 
@@ -72,7 +78,6 @@ export default function ProfileScreen() {
       [
         {
           text: "Cancelar",
-          onPress: () => console.log("[ProfileScreen] Exclusão cancelada"),
           style: "cancel"
         },
         {
@@ -81,8 +86,8 @@ export default function ProfileScreen() {
             try {
               await deleteAccountMutation.mutateAsync();
               setAlert({ type: "success", message: "Conta deletada com sucesso!" });
-            } catch {
-              setAlert({ type: "error", message: "Erro ao deletar conta. Tente novamente." });
+            } catch (error: unknown) {
+              setAlert({ type: "error", message: getUiErrorMessage(error, "Erro ao deletar conta.") });
             }
           },
           style: "destructive",
@@ -91,12 +96,11 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch {
-      setAlert({ type: "error", message: "Erro ao fazer logout. Tente novamente." });
-    }
+  const handleLogout = () => {
+    Alert.alert("Sair da conta", "Deseja encerrar sua sessão?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Sair", style: "destructive", onPress: logout },
+    ]);
   };
 
   return (
@@ -110,7 +114,30 @@ export default function ProfileScreen() {
           />
         )}
 
-        <ProfileHeader name={user?.name || "Usuário"} email={user?.userId || "usuario@email.com"} />
+        <View style={styles.brandHeader}>
+          <BrandMark compact />
+          <Text style={styles.eyebrow}>PERFIL PATRIMONIAL</Text>
+        </View>
+
+        <ProfileHeader name={user?.name || "Usuário"} subtitle="Membro Midnight Capital" />
+
+        <View style={styles.netWorthCard}>
+          <Text style={styles.netWorthLabel}>PATRIMÔNIO TOTAL ESTIMADO</Text>
+          <Text style={styles.netWorthValue}>R$ 0,00</Text>
+          <Text style={styles.netWorthTrend}>Dados consolidados no dashboard</Text>
+        </View>
+
+        <View style={styles.healthGrid}>
+          <HealthCard icon="water-outline" label="Liquidez" value="Em análise" />
+          <HealthCard icon="pie-chart-outline" label="Alocação" value="Carteira ativa" />
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Objetivos financeiros</Text>
+          <Text style={styles.sectionLink}>Ver todos</Text>
+        </View>
+        <GoalCard label="Reserva estratégica" progress={38} />
+        <GoalCard label="Independência financeira" progress={12} />
 
         <SettingGroup title="Segurança">
           <SettingItem
@@ -175,7 +202,7 @@ export default function ProfileScreen() {
             icon="document-text"
             label="Política de Privacidade"
             description="Leia nossa política de dados"
-            disabled
+            onPress={() => router.push("/legal/privacy" as Href)}
           />
 
           <SettingItem
@@ -196,11 +223,11 @@ export default function ProfileScreen() {
         </SettingGroup>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={false}>
-          <FontAwesome6 name="arrow-right-from-bracket" size={18} color="#fff" />
+          <FontAwesome6 name="arrow-right-from-bracket" size={18} color={Colors.error} />
           <Text style={styles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>FinanceSecure v1.0.0</Text>
+        <Text style={styles.version}>Midnight Capital v1.0.0</Text>
       </ScrollView>
 
       <Modal
@@ -246,7 +273,7 @@ export default function ProfileScreen() {
               disabled={changePasswordMutation.isPending}
             >
               {changePasswordMutation.isPending ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={Colors.background} />
               ) : (
                 <Text style={styles.modalButtonText}>Alterar Senha</Text>
               )}
@@ -297,7 +324,7 @@ export default function ProfileScreen() {
               disabled={changeEmailMutation.isPending}
             >
               {changeEmailMutation.isPending ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={Colors.background} />
               ) : (
                 <Text style={styles.modalButtonText}>Alterar Email</Text>
               )}
@@ -317,6 +344,39 @@ export default function ProfileScreen() {
   );
 }
 
+function HealthCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.healthCard}>
+      <Ionicons name={icon} size={18} color={Colors.primary} />
+      <Text style={styles.healthLabel}>{label}</Text>
+      <Text style={styles.healthValue}>{value}</Text>
+    </View>
+  );
+}
+
+function GoalCard({ label, progress }: { label: string; progress: number }) {
+  return (
+    <View style={styles.goalCard}>
+      <View style={styles.goalHeader}>
+        <Text style={styles.goalLabel}>{label}</Text>
+        <Text style={styles.goalValue}>{progress}%</Text>
+      </View>
+      <View style={styles.goalTrack}>
+        <View style={[styles.goalFill, { width: `${progress}%` }]} />
+      </View>
+      <Text style={styles.goalCaption}>Estrutura preparada para metas personalizadas</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -324,7 +384,122 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 16,
+    paddingTop: 42,
     paddingBottom: 80,
+  },
+  brandHeader: {
+    marginBottom: 4,
+  },
+  eyebrow: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginTop: 18,
+  },
+  netWorthCard: {
+    borderRadius: 16,
+    backgroundColor: Colors.secondary,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 18,
+    marginBottom: 12,
+  },
+  netWorthLabel: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+  },
+  netWorthValue: {
+    color: Colors.text,
+    fontSize: 28,
+    fontWeight: "800",
+    marginTop: 8,
+  },
+  netWorthTrend: {
+    color: Colors.receita,
+    fontSize: 11,
+    marginTop: 8,
+  },
+  healthGrid: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 24,
+  },
+  healthCard: {
+    flex: 1,
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 14,
+  },
+  healthLabel: {
+    color: Colors.text_muted,
+    fontSize: 11,
+    marginTop: 10,
+  },
+  healthValue: {
+    color: Colors.text,
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 4,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    color: Colors.text,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  sectionLink: {
+    color: Colors.primary,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  goalCard: {
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 14,
+    marginBottom: 10,
+  },
+  goalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  goalLabel: {
+    color: Colors.text,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  goalValue: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  goalTrack: {
+    height: 5,
+    overflow: "hidden",
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceSoft,
+    marginTop: 12,
+  },
+  goalFill: {
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: Colors.primary,
+  },
+  goalCaption: {
+    color: Colors.text_muted,
+    fontSize: 10,
+    marginTop: 9,
   },
   logoutButton: {
     flexDirection: "row",
@@ -333,13 +508,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginVertical: 24,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 14,
     backgroundColor: Colors.logout,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
+    color: Colors.error,
   },
   version: {
     textAlign: "center",
@@ -349,7 +524,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: Colors.overlay,
     justifyContent: "flex-end",
   },
   modalContent: {
@@ -373,7 +548,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: Colors.background,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingHorizontal: 12,
@@ -383,20 +558,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   modalButton: {
-    backgroundColor: Colors.button,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
     marginBottom: 12,
   },
   modalButtonText: {
-    color: "#fff",
+    color: Colors.background,
     fontSize: 16,
     fontWeight: "600",
   },
   modalButtonSecondary: {
     backgroundColor: Colors.border,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
   },

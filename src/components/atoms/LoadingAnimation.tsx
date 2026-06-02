@@ -1,4 +1,4 @@
-import { Colors } from "@constants/theme";
+import { Colors, Radius } from "@constants/theme";
 import React from "react";
 import { ActivityIndicator, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -7,13 +7,15 @@ interface LoadingAnimationProps {
   onPress: (event: GestureResponderEvent) => void;
   buttonText: string;
   buttonColor?: string;
+  disabled?: boolean;
 }
 
 const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
   isLoading,
   onPress,
   buttonText,
-  buttonColor
+  buttonColor,
+  disabled = false,
 }) => {
   return (
     <View style={styles.container}>
@@ -27,6 +29,7 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
         <TouchableOpacity
           style={[styles.button, { backgroundColor: buttonColor || Colors.primary }]}
           onPress={onPress}
+          disabled={disabled}
           activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>{buttonText}</Text>
@@ -47,14 +50,15 @@ const styles = StyleSheet.create({
   },
   button: {
     height: '100%',
-    borderRadius: 12,
+    borderRadius: Radius.medium,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
-    color: Colors.text,
-    fontSize: 16,
-    fontWeight: "bold",
+    color: Colors.background,
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
 });

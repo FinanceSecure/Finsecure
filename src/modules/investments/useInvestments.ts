@@ -10,6 +10,7 @@ const invalidateInvestmentData = async (
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: investmentKeys.statement() }),
     queryClient.invalidateQueries({ queryKey: investmentKeys.investedAmount() }),
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
   ]);
 };
 

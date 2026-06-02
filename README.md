@@ -1,6 +1,6 @@
-# Finsecure
+# Midnight Capital
 
-Finsecure: um aplicativo móvel de finanças pessoais que consolida saldos, gastos, receitas e investimentos para uma gestão financeira completa e inteligente.
+Midnight Capital: uma experiência premium de gestão patrimonial que consolida saldos, gastos, receitas e investimentos em uma interface preparada para evolução inteligente.
 
 Construído com **React Native**, **Expo** e **TypeScript**, o projeto adota uma arquitetura modular que isola estritamente a camada visual (telas), as regras de negócio e as integrações com APIs, garantindo escalabilidade e facilidade de manutenção.
 
@@ -72,6 +72,18 @@ EXPO_PUBLIC_API_URL=http://localhost:3000/api
 
 Em emulador Android, o endereço local da máquina costuma ser acessado por `10.0.2.2`. Em dispositivo físico, utilize o IP da máquina na mesma rede.
 
+Em produção, `EXPO_PUBLIC_API_URL` é obrigatória e deve usar HTTPS. Variáveis
+`EXPO_PUBLIC_*` são incluídas no bundle do app: não armazene segredos nelas.
+
+## Build beta
+
+O projeto inclui perfis EAS em `eas.json`. Configure a URL HTTPS da API no
+ambiente do build e execute:
+
+```bash
+npx eas-cli build --platform android --profile preview
+```
+
 ## Como Executar
 
 Instale as dependências:
@@ -95,6 +107,13 @@ npm run web
 ```
 
 Depois que o Expo iniciar, é possível abrir o app no emulador, simulador ou em um dispositivo físico pelo Expo Go.
+
+## Evolução planejada
+
+A arquitetura modular atual permite adicionar novos domínios em `src/modules`
+sem misturar regras nas telas. Próximos módulos previstos: objetivos financeiros,
+importação OFX, recomendações com IA, planos gratuito/pro, assinatura, onboarding
+e alertas financeiros. Essas funcionalidades não fazem parte do beta atual.
 
 ## Scripts
 

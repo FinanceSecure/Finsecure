@@ -1,5 +1,5 @@
 import { request } from "@/api/httpClient";
-import { secureTokenStorage } from "@/storage/secureTokenStorage";
+import { authTokenStorage } from "@/storage/authTokenStorage";
 import { AuthResponse, LoginDTO, RegisterDTO, UserTokenData } from "./auth.types";
 
 export const authService = {
@@ -27,11 +27,11 @@ export const authService = {
     });
   },
 
-  changePassword: async (password: string): Promise<void> => {
+  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
     await request<unknown>({
       method: "PUT",
       url: "/usuarios/alterar-senha",
-      data: { password },
+      data: { oldPassword, newPassword },
     });
   },
 
@@ -42,12 +42,12 @@ export const authService = {
     });
   },
 
-  setToken: secureTokenStorage.setToken,
-  getToken: secureTokenStorage.getToken,
-  removeToken: secureTokenStorage.removeToken,
+  setToken: authTokenStorage.setToken,
+  getToken: authTokenStorage.getToken,
+  removeToken: authTokenStorage.removeToken,
 
   getUserFromToken: async (): Promise<UserTokenData | null> => {
-    const payload = await secureTokenStorage.getPayload();
+    const payload = await authTokenStorage.getPayload();
     if (!payload?.name || !(payload.userId || payload.sub)) return null;
 
     return {

@@ -1,4 +1,5 @@
 import React from "react";
+import { Colors } from "@/constants/theme";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const IOFData: React.FC = () => {
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     right: 20
   },
   infoText: {
-    color: "#FFF",
+    color: Colors.background,
     fontSize: 20,
     fontWeight: "bold"
   }

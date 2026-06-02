@@ -16,7 +16,7 @@ export const AlertMessage = ({ type, message, onClose }: AlertMessageProps) => {
     info: Colors.link,
   };
 
-  const iconMap = {
+  const iconMap: Record<AlertMessageProps["type"], keyof typeof Ionicons.glyphMap> = {
     error: "alert-circle",
     success: "checkmark-circle",
     warning: "warning",
@@ -26,7 +26,7 @@ export const AlertMessage = ({ type, message, onClose }: AlertMessageProps) => {
   return (
     <View style={[styles.container, { borderLeftColor: colorMap[type] }]}>
       <View style={styles.content}>
-        <Ionicons name={iconMap[type] as any} size={20} color={colorMap[type]} />
+        <Ionicons name={iconMap[type]} size={20} color={colorMap[type]} />
         <Text style={styles.message}>{message}</Text>
       </View>
       {onClose && (

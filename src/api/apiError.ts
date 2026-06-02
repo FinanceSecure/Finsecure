@@ -6,6 +6,7 @@ export type ApiErrorCode =
   | "VALIDATION"
   | "NOT_FOUND"
   | "CONFLICT"
+  | "RATE_LIMIT"
   | "NETWORK"
   | "UNKNOWN";
 
@@ -27,6 +28,7 @@ const statusToCode = (status?: number): ApiErrorCode => {
   if (status === 400 || status === 422) return "VALIDATION";
   if (status === 404) return "NOT_FOUND";
   if (status === 409) return "CONFLICT";
+  if (status === 429) return "RATE_LIMIT";
   return "UNKNOWN";
 };
 
@@ -36,6 +38,7 @@ const fallbackByCode: Record<ApiErrorCode, string> = {
   VALIDATION: "Verifique os dados informados.",
   NOT_FOUND: "Recurso não encontrado.",
   CONFLICT: "Não foi possível concluir a operação com os dados atuais.",
+  RATE_LIMIT: "Muitas tentativas em pouco tempo. Aguarde e tente novamente.",
   NETWORK: "Servidor indisponível. Verifique sua conexão.",
   UNKNOWN: "Não foi possível concluir a operação.",
 };

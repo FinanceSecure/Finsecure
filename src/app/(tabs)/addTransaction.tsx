@@ -1,8 +1,8 @@
 import { getUiErrorMessage } from "@/api/apiError";
-import { Colors } from "@constants/theme";
+import { Colors, Radius } from "@constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -13,7 +13,11 @@ import {
   View,
 } from "react-native";
 import { useCreateTransaction } from "@/modules/transactions/useTransactions";
-import { TransactionType } from "@/modules/transactions/transactions.types";
+import {
+  TransactionCategory,
+  TransactionType,
+} from "@/modules/transactions/transactions.types";
+import * as Haptics from "expo-haptics";
 
 const parseMoneyInput = (value: string): number => {
   const normalizedValue = value
@@ -27,16 +31,30 @@ const parseMoneyInput = (value: string): number => {
 
 export default function AddTransaction() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ type?: string }>();
   const createTransaction = useCreateTransaction();
   const [type, setType] = useState<TransactionType>("EXPENSE");
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<TransactionCategory>("OTHER");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   const numericAmount = useMemo(() => parseMoneyInput(amount), [amount]);
 
+  useEffect(() => {
+    if (params.type === "INCOME" || params.type === "EXPENSE") {
+      setType(params.type);
+    }
+  }, [params.type]);
+
   const handleSave = async () => {
-    if (!title.trim() || numericAmount <= 0) {
-      Alert.alert("Atenção", "Preencha o título e um valor maior que zero.");
+    if (!title.trim() || title.trim().length > 100 || numericAmount <= 0) {
+      Alert.alert("Atenção", "Preencha uma descrição com até 100 caracteres e valor maior que zero.");
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(new Date(date).getTime())) {
+      Alert.alert("Atenção", "Informe a data no formato AAAA-MM-DD.");
       return;
     }
 
@@ -44,12 +62,13 @@ export default function AddTransaction() {
       await createTransaction.mutateAsync({
         title: title.trim(),
         amount: numericAmount,
-        date: new Date().toISOString(),
+        date: new Date(date).toISOString(),
         type,
-        category: "OTHER",
+        category,
         isRecurring: false,
       });
 
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Sucesso", "Transação registrada.");
       router.back();
     } catch (error: unknown) {
@@ -67,6 +86,17 @@ export default function AddTransaction() {
         <View style={styles.headerSpacer} />
       </View>
 
+      <Text style={styles.eyebrow}>MOVIMENTAÇÃO FINANCEIRA</Text>
+      <Text style={styles.amountLabel}>VALOR DA TRANSAÇÃO</Text>
+      <TextInput
+        style={styles.inputAmount}
+        placeholder="R$ 0,00"
+        placeholderTextColor={Colors.placeholder}
+        keyboardType="decimal-pad"
+        value={amount}
+        onChangeText={setAmount}
+      />
+
       <View style={styles.typeSelector}>
         <TouchableOpacity
           style={[styles.typeButton, type === "INCOME" && styles.typeIncomeActive]}
@@ -75,7 +105,7 @@ export default function AddTransaction() {
           <Ionicons
             name="arrow-up-circle"
             size={20}
-            color={type === "INCOME" ? "#FFF" : Colors.success}
+            color={type === "INCOME" ? Colors.background : Colors.success}
           />
           <Text style={[styles.typeText, type === "INCOME" && styles.typeTextActive]}>
             Receita
@@ -89,29 +119,60 @@ export default function AddTransaction() {
           <Ionicons
             name="arrow-down-circle"
             size={20}
-            color={type === "EXPENSE" ? "#FFF" : Colors.error}
+            color={type === "EXPENSE" ? Colors.background : Colors.error}
           />
           <Text style={[styles.typeText, type === "EXPENSE" && styles.typeTextActive]}>
             Despesa
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.typeButton}
+          onPress={() => router.push("/(tabs)/investments")}
+        >
+          <Ionicons name="trending-up" size={20} color={Colors.primary} />
+          <Text style={styles.typeText}>Investir</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Valor</Text>
-        <TextInput
-          style={styles.inputAmount}
-          placeholder="R$ 0,00"
-          placeholderTextColor={Colors.text_muted}
-          keyboardType="decimal-pad"
-          value={amount}
-          onChangeText={setAmount}
-        />
+        <Text style={styles.label}>CATEGORIA</Text>
+        <View style={styles.categoryGrid}>
+          {categoryOptions.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.categoryChip,
+                category === option.value && styles.categoryChipActive,
+              ]}
+              onPress={() => setCategory(option.value)}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  category === option.value && styles.categoryChipTextActive,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <Text style={styles.label}>Título</Text>
+        <Text style={styles.label}>DATA</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ex: Conta de luz, salário..."
+          placeholder="AAAA-MM-DD"
+          placeholderTextColor={Colors.text_muted}
+          value={date}
+          onChangeText={setDate}
+          keyboardType="numbers-and-punctuation"
+        />
+
+        <Text style={styles.label}>DESCRIÇÃO</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Mercado mensal"
           placeholderTextColor={Colors.text_muted}
           value={title}
           onChangeText={setTitle}
@@ -131,6 +192,13 @@ export default function AddTransaction() {
   );
 }
 
+const categoryOptions: { label: string; value: TransactionCategory }[] = [
+  { label: "Geral", value: "OTHER" },
+  { label: "Moradia", value: "HOUSING" },
+  { label: "Alimentação", value: "FOOD" },
+  { label: "Transporte", value: "TRANSPORT" },
+];
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -142,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 40,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   headerTitle: {
     fontSize: 20,
@@ -155,7 +223,10 @@ const styles = StyleSheet.create({
   typeSelector: {
     flexDirection: "row",
     gap: 15,
-    marginBottom: 30,
+    marginBottom: 28,
+    padding: 4,
+    borderRadius: Radius.medium,
+    backgroundColor: Colors.surface,
   },
   typeButton: {
     flex: 1,
@@ -163,15 +234,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 15,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
+    borderRadius: Radius.small,
+    backgroundColor: "transparent",
     gap: 8,
   },
   typeIncomeActive: {
-    backgroundColor: Colors.success,
+    backgroundColor: Colors.primary,
   },
   typeExpenseActive: {
-    backgroundColor: Colors.error,
+    backgroundColor: Colors.primary,
   },
   typeText: {
     fontSize: 16,
@@ -179,35 +250,63 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   typeTextActive: {
-    color: "#FFF",
+    color: Colors.background,
   },
   form: {
     gap: 20,
   },
   label: {
     color: Colors.text_muted,
-    fontSize: 14,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
     marginBottom: -10,
   },
   inputAmount: {
-    fontSize: 32,
+    fontSize: 38,
     fontWeight: "bold",
     color: Colors.text,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surface,
-    paddingVertical: 10,
+    borderBottomColor: Colors.border,
+    paddingVertical: 14,
+    marginBottom: 20,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.input,
     color: Colors.text,
     padding: 16,
-    borderRadius: 12,
-    fontSize: 16,
+    borderRadius: Radius.medium,
+    fontSize: 14,
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  categoryChip: {
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  categoryChipActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  categoryChipText: {
+    color: Colors.text_muted,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  categoryChipTextActive: {
+    color: Colors.background,
   },
   saveButton: {
-    backgroundColor: Colors.button,
+    backgroundColor: Colors.primary,
     padding: 18,
-    borderRadius: 12,
+    borderRadius: Radius.medium,
     alignItems: "center",
     marginTop: 20,
   },
@@ -215,8 +314,21 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   saveButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: Colors.background,
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  eyebrow: {
+    color: Colors.primary,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+  },
+  amountLabel: {
+    color: Colors.text_muted,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    marginTop: 20,
   },
 });

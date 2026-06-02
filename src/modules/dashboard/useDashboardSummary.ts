@@ -78,17 +78,6 @@ export const useDashboardSummary = () => {
         investments: buildInvestmentBreakdown(investmentStatement.investments, totalInvested),
       };
 
-      if (__DEV__) {
-        console.log("[DashboardSummary]", {
-          balance: summary.balance,
-          incomes: summary.incomes,
-          expenses: summary.expenses,
-          totalInvested: summary.totalInvested,
-          transactions: summary.recentTransactions.length,
-          investments: summary.investments.length,
-        });
-      }
-
       return summary;
     },
     staleTime: 30_000,

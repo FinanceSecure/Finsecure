@@ -1,4 +1,4 @@
-import { Colors } from "@constants/theme";
+import { Colors, Radius } from "@constants/theme";
 import React from "react";
 import {
   StyleSheet,
@@ -29,9 +29,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     paddingHorizontal: 15,
-    borderRadius: 12,
-    fontSize: 16,
+    borderRadius: Radius.medium,
+    fontSize: 14,
     color: Colors.text,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.input,
   },
 });

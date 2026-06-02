@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "finsecure",
+    "name": "Midnight Capital",
     "slug": "finsecure",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,12 +9,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.finsecure.app"
     },
     "android": {
+      "package": "com.finsecure.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0A0E14"
       },
       "edgeToEdgeEnabled": true
     },
@@ -31,11 +33,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#0A0E14"
         }
       ],
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

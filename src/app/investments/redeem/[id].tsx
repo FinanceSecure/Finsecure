@@ -3,6 +3,7 @@ import { Colors } from "@/constants/theme";
 import { useRedeemInvestment } from "@/modules/investments/useInvestments";
 import { FormatarMoeda } from "@/utils/formatters";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -44,7 +45,7 @@ export default function RedeemInvestmentScreen() {
   const numericAmount = useMemo(() => parseCurrencyInput(amount), [amount]);
   const redeemInvestment = useRedeemInvestment();
 
-  async function handleRedeem() {
+  async function redeemConfirmedAmount() {
     if (!investmentId) {
       Alert.alert("Erro", "Investimento não informado.");
       return;
@@ -66,6 +67,7 @@ export default function RedeemInvestmentScreen() {
         amount: numericAmount,
       });
 
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
         "Sucesso",
         "Resgate realizado com sucesso.",
@@ -79,6 +81,22 @@ export default function RedeemInvestmentScreen() {
 
       Alert.alert("Falha", message);
     }
+  }
+
+  function handleRedeem() {
+    if (!investmentId || numericAmount <= 0 || numericAmount > numericBalance) {
+      redeemConfirmedAmount();
+      return;
+    }
+
+    Alert.alert(
+      "Confirmar resgate",
+      `Deseja resgatar ${FormatarMoeda(numericAmount)}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Resgatar", style: "destructive", onPress: redeemConfirmedAmount },
+      ]
+    );
   }
 
   return (
@@ -116,7 +134,7 @@ export default function RedeemInvestmentScreen() {
           onPress={handleRedeem}
         >
           {redeemInvestment.isPending ? (
-            <ActivityIndicator color="#FFF" />
+            <ActivityIndicator color={Colors.text} />
           ) : (
             <Text style={styles.redeemButtonText}>Confirmar Resgate</Text>
           )}
@@ -197,7 +215,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   redeemButtonText: {
-    color: "#FFF",
+    color: Colors.text,
     fontSize: 16,
     fontWeight: "bold",
   },

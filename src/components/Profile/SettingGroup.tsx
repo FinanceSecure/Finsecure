@@ -10,7 +10,7 @@ export const SettingGroup = ({ title, children }: SettingGroupProps) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-      {children}
+      <View style={styles.content}>{children}</View>
     </View>
   );
 };
@@ -26,5 +26,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  content: {
+    overflow: "hidden",
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
 });
