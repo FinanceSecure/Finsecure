@@ -17,14 +17,31 @@ import {
   View,
 } from "react-native";
 
+const parseRouteNumber = (value?: string): number => {
+  if (!value) return 0;
+
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : 0;
+};
+
 const parseCurrencyInput = (value: string): number => {
   const normalizedValue = value
     .replace(/\s/g, "")
+    .replace("R$", "")
     .replace(/\./g, "")
     .replace(",", ".");
 
   const numberValue = Number(normalizedValue);
+
   return Number.isFinite(numberValue) ? numberValue : 0;
+};
+
+const formatCurrencyInput = (value: number): string => {
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 };
 
 export default function RedeemInvestmentScreen() {
@@ -38,10 +55,12 @@ export default function RedeemInvestmentScreen() {
   const investmentName = Array.isArray(name) ? name[0] : name;
   const balanceParam = Array.isArray(balance) ? balance[0] : balance;
   const numericBalance = useMemo(
-    () => parseCurrencyInput(balanceParam || "0"),
-    [balanceParam]
+    () => parseRouteNumber(balanceParam),
+    [balanceParam],
   );
-  const [amount, setAmount] = useState(numericBalance.toFixed(2));
+  const [amount, setAmount] = useState(() =>
+    formatCurrencyInput(numericBalance),
+  );
   const numericAmount = useMemo(() => parseCurrencyInput(amount), [amount]);
   const redeemInvestment = useRedeemInvestment();
 
@@ -68,16 +87,20 @@ export default function RedeemInvestmentScreen() {
       });
 
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        "Sucesso",
-        "Resgate realizado com sucesso.",
-        [{ text: "OK", onPress: () => router.replace("/(tabs)/investments") }]
-      );
+
+      Alert.alert("Sucesso", "Resgate realizado com sucesso.", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)/investments"),
+        },
+      ]);
     } catch (error: unknown) {
       const apiError = toApiError(error);
-      const message = apiError.code === "VALIDATION" || apiError.code === "CONFLICT"
-        ? apiError.message
-        : getUiErrorMessage(error, "Erro ao resgatar investimento.");
+
+      const message =
+        apiError.code === "VALIDATION" || apiError.code === "CONFLICT"
+          ? apiError.message
+          : getUiErrorMessage(error, "Erro ao resgatar investimento.");
 
       Alert.alert("Falha", message);
     }
@@ -93,9 +116,16 @@ export default function RedeemInvestmentScreen() {
       "Confirmar resgate",
       `Deseja resgatar ${FormatarMoeda(numericAmount)}?`,
       [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Resgatar", style: "destructive", onPress: redeemConfirmedAmount },
-      ]
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Resgatar",
+          style: "destructive",
+          onPress: redeemConfirmedAmount,
+        },
+      ],
     );
   }
 
@@ -107,12 +137,15 @@ export default function RedeemInvestmentScreen() {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Resgatar Investimento</Text>
+
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.infoCard}>
         <Text style={styles.investmentName}>{investmentName}</Text>
+
         <Text style={styles.balanceLabel}>Saldo disponível</Text>
+
         <Text style={styles.balanceValue}>{FormatarMoeda(numericBalance)}</Text>
       </View>
 
@@ -129,7 +162,10 @@ export default function RedeemInvestmentScreen() {
         />
 
         <TouchableOpacity
-          style={[styles.redeemButton, redeemInvestment.isPending && styles.disabledButton]}
+          style={[
+            styles.redeemButton,
+            redeemInvestment.isPending && styles.disabledButton,
+          ]}
           disabled={redeemInvestment.isPending}
           onPress={handleRedeem}
         >
