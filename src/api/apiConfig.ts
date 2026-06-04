@@ -1,3 +1,4 @@
+const DEFAULT_API_BASE_URL = "https://finsecureapi.onrender.com/api";
 const configuredBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
 
 const assertValidBaseUrl = (baseUrl: string): string => {
@@ -16,8 +17,6 @@ const assertValidBaseUrl = (baseUrl: string): string => {
   return baseUrl.replace(/\/+$/, "");
 };
 
-if (!configuredBaseUrl) {
-  throw new Error("EXPO_PUBLIC_API_URL deve ser configurada.");
-}
-
-export const API_BASE_URL = assertValidBaseUrl(configuredBaseUrl);
+export const API_BASE_URL = assertValidBaseUrl(
+  configuredBaseUrl || DEFAULT_API_BASE_URL
+);

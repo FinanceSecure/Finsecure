@@ -68,16 +68,17 @@ Para apontar o aplicativo para um backend específico, configure a variável
 `EXPO_PUBLIC_API_URL` antes de iniciar o Expo ou gerar builds:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://api.seu-dominio.com/api
+EXPO_PUBLIC_API_URL=https://finsecureapi.onrender.com/api
 ```
 
 Em desenvolvimento local, use uma URL acessível pelo emulador ou dispositivo
 físico e configure-a somente no seu ambiente local. Não deixe URLs locais
 hardcoded no código.
 
-Em beta/produção, `EXPO_PUBLIC_API_URL` é obrigatória e deve usar HTTPS.
-Variáveis `EXPO_PUBLIC_*` são incluídas no bundle do app: não armazene
-segredos nelas.
+O app usa `https://finsecureapi.onrender.com/api` como base pública padrão,
+e `EXPO_PUBLIC_API_URL` pode sobrescrever essa URL quando necessário. Em
+beta/produção, qualquer URL configurada deve usar HTTPS. Variáveis
+`EXPO_PUBLIC_*` são incluídas no bundle do app: não armazene segredos nelas.
 
 ## Build beta
 
