@@ -1,6 +1,6 @@
-# Midnight Capital
+# FinanceSecure
 
-Midnight Capital: uma experiência premium de gestão patrimonial que consolida saldos, gastos, receitas e investimentos em uma interface preparada para evolução inteligente.
+FinanceSecure: uma experiência premium de gestão patrimonial que consolida saldos, gastos, receitas e investimentos em uma interface preparada para evolução inteligente.
 
 Construído com **React Native**, **Expo** e **TypeScript**, o projeto adota uma arquitetura modular que isola estritamente a camada visual (telas), as regras de negócio e as integrações com APIs, garantindo escalabilidade e facilidade de manutenção.
 

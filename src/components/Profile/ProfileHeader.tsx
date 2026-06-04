@@ -17,7 +17,7 @@ export const ProfileHeader = ({ name, subtitle }: ProfileHeaderProps) => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{name || "Usuário"}</Text>
         <Text style={styles.subtitle}>
-          {subtitle || "Dados protegidos pela Midnight Capital"}
+          {subtitle || "Dados protegidos pelo FinanceSecure"}
         </Text>
       </View>
     </View>

@@ -67,12 +67,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const login = useCallback(async (data: LoginDTO) => {
     const response = await authService.login(data);
+    const accessToken = response.accessToken ?? response.token;
 
-    if (!response.token) {
+    if (!accessToken) {
       throw new Error("Resposta de autenticação inválida.");
     }
 
-    await authTokenStorage.setToken(response.token);
+    await authTokenStorage.setToken(accessToken);
     await refreshSession();
   }, [refreshSession]);
 

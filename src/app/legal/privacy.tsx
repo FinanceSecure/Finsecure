@@ -16,7 +16,7 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <Text style={styles.paragraph}>
-        Esta tela reserva o espaço da política de privacidade da Midnight Capital.
+        Esta tela reserva o espaço da política de privacidade do FinanceSecure.
         Antes da publicação, substitua este conteúdo pelo texto jurídico aprovado.
       </Text>
       <Text style={styles.paragraph}>

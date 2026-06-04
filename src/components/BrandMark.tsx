@@ -12,7 +12,7 @@ export function BrandMark({ compact = false }: BrandMarkProps) {
       <View style={[styles.iconWrap, compact && styles.compactIcon]}>
         <Ionicons name="analytics" size={compact ? 14 : 20} color={Colors.primary} />
       </View>
-      <Text style={[styles.name, compact && styles.compactName]}>Midnight Capital</Text>
+      <Text style={[styles.name, compact && styles.compactName]}>FinanceSecure</Text>
     </View>
   );
 }

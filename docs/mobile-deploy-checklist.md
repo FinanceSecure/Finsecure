@@ -6,7 +6,7 @@
 - [ ] Confirmar que nenhuma variável `EXPO_PUBLIC_*` contém segredo.
 - [ ] Validar `.env.example` com apenas variáveis públicas.
 - [ ] Confirmar `app.json`: nome, slug, versão, `android.package` e `ios.bundleIdentifier`.
-- [ ] Confirmar ícone, adaptive icon e splash com a identidade Midnight Capital.
+- [ ] Confirmar ícone, adaptive icon e splash com a identidade FinanceSecure.
 
 ## Segurança
 

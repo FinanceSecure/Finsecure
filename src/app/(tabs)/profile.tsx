@@ -119,7 +119,7 @@ export default function ProfileScreen() {
           <Text style={styles.eyebrow}>PERFIL PATRIMONIAL</Text>
         </View>
 
-        <ProfileHeader name={user?.name || "Usuário"} subtitle="Membro Midnight Capital" />
+        <ProfileHeader name={user?.name || "Usuário"} subtitle="Membro FinanceSecure" />
 
         <View style={styles.netWorthCard}>
           <Text style={styles.netWorthLabel}>PATRIMÔNIO TOTAL ESTIMADO</Text>
@@ -227,7 +227,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
 
-        <Text style={styles.version}>Midnight Capital v1.0.0</Text>
+        <Text style={styles.version}>FinanceSecure v1.0.0</Text>
       </ScrollView>
 
       <Modal
