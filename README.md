@@ -64,16 +64,20 @@ A área principal do app usa abas, configuradas em `src/app/(tabs)/_layout.tsx`:
 
 O app consome uma API externa por meio do cliente HTTP centralizado em `src/api/httpClient.ts`.
 
-Para apontar o aplicativo para um backend específico em desenvolvimento, use:
+Para apontar o aplicativo para um backend específico, configure a variável
+`EXPO_PUBLIC_API_URL` antes de iniciar o Expo ou gerar builds:
 
 ```bash
-EXPO_PUBLIC_API_URL=http://localhost:3000/api
+EXPO_PUBLIC_API_URL=https://api.seu-dominio.com/api
 ```
 
-Em emulador Android, o endereço local da máquina costuma ser acessado por `10.0.2.2`. Em dispositivo físico, utilize o IP da máquina na mesma rede.
+Em desenvolvimento local, use uma URL acessível pelo emulador ou dispositivo
+físico e configure-a somente no seu ambiente local. Não deixe URLs locais
+hardcoded no código.
 
-Em produção, `EXPO_PUBLIC_API_URL` é obrigatória e deve usar HTTPS. Variáveis
-`EXPO_PUBLIC_*` são incluídas no bundle do app: não armazene segredos nelas.
+Em beta/produção, `EXPO_PUBLIC_API_URL` é obrigatória e deve usar HTTPS.
+Variáveis `EXPO_PUBLIC_*` são incluídas no bundle do app: não armazene
+segredos nelas.
 
 ## Build beta
 
